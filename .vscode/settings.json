@@ -1,0 +1,17 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  // Remove trailing auto inserted whitespace
+  "editor.trimAutoWhitespace": true,
+
+  // Controls if the diff editor shows changes in leading or trailing whitespace as diffs
+  "diffEditor.ignoreTrimWhitespace": false,
+
+  // Configure glob patterns for excluding files and folders.
+  "files.exclude": {
+    "bin": true,
+    "obj": true,
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.DS_Store": true
+  }
+}
