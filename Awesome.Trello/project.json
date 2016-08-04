@@ -5,13 +5,17 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
+        "Handler.fs",
         "Program.fs"
       ]
     }
   },
   "dependencies": {
+    "Microsoft.AspNetCore.Diagnostics": "1.0.0",
+    "Microsoft.AspNetCore.Routing": "1.0.0",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
+    "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160627"
   },
   "tools": {
@@ -35,6 +39,7 @@
   },
   "publishOptions": {
     "include": [
+      "*.html",
       "web.config"
     ]
   },
