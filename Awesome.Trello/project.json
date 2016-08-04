@@ -39,6 +39,7 @@
   },
   "publishOptions": {
     "include": [
+      "*.html",
       "web.config"
     ]
   },
