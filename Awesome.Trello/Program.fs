@@ -18,7 +18,7 @@ type Startup() =
       app.UseDeveloperExceptionPage() |> ignore
 
     let routerBuilder = RouteBuilder(app)
-    routerBuilder.MapGet("", (fun (x: HttpContext) -> x.Response.WriteAsync("Hello World"))) |> ignore
+    routerBuilder.MapGet("", Handler.index) |> ignore
     app.UseRouter(routerBuilder.Build()) |> ignore
 
 [<EntryPoint>]
