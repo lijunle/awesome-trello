@@ -251,3 +251,8 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# elm-package generated files
+elm-stuff
+# elm-repl generated files
+repl-temp-*

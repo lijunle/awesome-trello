@@ -1,0 +1,15 @@
+{
+    "version": "0.0.1",
+    "summary": "Some awesome Trello utilities.",
+    "repository": "https://github.com/lijunle/awesome-trello.git",
+    "license": "MIT",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": [],
+    "dependencies": {
+        "elm-lang/core": "4.0.4 <= v < 5.0.0",
+        "elm-lang/html": "1.1.0 <= v < 2.0.0"
+    },
+    "elm-version": "0.17.1 <= v < 0.18.0"
+}
