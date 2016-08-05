@@ -6,6 +6,9 @@
   // Controls if the diff editor shows changes in leading or trailing whitespace as diffs
   "diffEditor.ignoreTrimWhitespace": false,
 
+  // Run elm-format on save.
+  "elm-format.formatOnSave": true,
+
   // Configure glob patterns for excluding files and folders.
   "files.exclude": {
     "bin": true,
