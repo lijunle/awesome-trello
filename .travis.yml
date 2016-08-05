@@ -15,6 +15,11 @@ script:
   - dotnet restore
   - dotnet build ./Awesome.Trello -c Release
 
+before_deploy:
+  - rm Awesome.Trello/.gitignore
+  - git add .
+  - git commit -m "Compile ELM"
+
 deploy:
   provider: azure_web_apps
   on:
