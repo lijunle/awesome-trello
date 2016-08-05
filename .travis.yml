@@ -7,6 +7,8 @@ script:
   - sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
   - sudo apt-get update
   - sudo apt-get install dotnet-dev-1.0.0-preview2-003121 --yes
+  # Install ELM binaries
+  - npm install -g elm
   # Print dotnet core info
   - dotnet --info
   # Build solution

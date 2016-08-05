@@ -19,6 +19,7 @@ type Startup() =
 
     let routerBuilder = RouteBuilder(app)
     routerBuilder.MapGet("", Handler.index) |> ignore
+    routerBuilder.MapGet("index.js", Handler.javascript) |> ignore
     app.UseRouter(routerBuilder.Build()) |> ignore
 
 [<EntryPoint>]
