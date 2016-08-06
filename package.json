@@ -3,5 +3,8 @@
     "elm": "^0.17.1",
     "object-assign": "^4.1.0",
     "uglify-js": "^2.7.0"
+  },
+  "devDependencies": {
+    "watch": "^0.19.1"
   }
 }
