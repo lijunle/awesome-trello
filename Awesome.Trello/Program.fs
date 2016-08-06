@@ -10,12 +10,18 @@ open Microsoft.Extensions.Logging
 
 type Startup() =
   member __.ConfigureServices(services: IServiceCollection): unit =
-    services.AddRouting() |> ignore
+    services
+      .AddRouting()
+      .AddDistributedMemoryCache()
+      .AddSession(fun options -> options.CookieName <- ".Awesome.Trello")
+      |> ignore
 
   member __.Configure(app: IApplicationBuilder, env: IHostingEnvironment, loggerFactory: ILoggerFactory): unit =
     if env.IsDevelopment() then
       loggerFactory.AddConsole() |> ignore
       app.UseDeveloperExceptionPage() |> ignore
+
+    app.UseSession() |> ignore
 
     let routerBuilder = RouteBuilder(app)
     routerBuilder.MapGet("", Handler.index) |> ignore

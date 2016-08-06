@@ -15,6 +15,8 @@
     "Microsoft.AspNetCore.Routing": "1.0.0",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
+    "Microsoft.AspNetCore.Session": "1.0.0",
+    "Microsoft.Extensions.Caching.Memory": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160627"
   },
