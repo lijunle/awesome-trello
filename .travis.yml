@@ -17,8 +17,8 @@ script:
 
 before_deploy:
   - rm Awesome.Trello/.gitignore
-  - git add .
-  - git commit -m "Compile ELM"
+  - git add . --all
+  - git commit --amend --reuse-message HEAD
 
 deploy:
   provider: azure_web_apps
