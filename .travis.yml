@@ -22,5 +22,4 @@ before_deploy:
 
 deploy:
   provider: azure_web_apps
-  on:
-    tags: true
+  on: master
