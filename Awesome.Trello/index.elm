@@ -35,13 +35,14 @@ type alias Config =
 
 
 type Model
-    = Login Url
+    = Init
+    | Login Url
     | Logout Name Url
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Login "", getConfig )
+    ( Init, getConfig )
 
 
 type Msg
@@ -66,6 +67,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     case model of
+        Init ->
+            text ""
+
         Login url ->
             a [ href url ] [ text "Login" ]
 
