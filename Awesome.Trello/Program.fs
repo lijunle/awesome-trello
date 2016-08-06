@@ -25,6 +25,8 @@ type Startup() =
 
     let routerBuilder = RouteBuilder(app)
     routerBuilder.MapGet("", Handler.index) |> ignore
+    routerBuilder.MapGet("login", Handler.login) |> ignore
+    routerBuilder.MapGet("logout", Handler.logout) |> ignore
     routerBuilder.MapGet("auth", Handler.auth) |> ignore
     routerBuilder.MapGet("index.js", Handler.javascript) |> ignore
     routerBuilder.MapGet("config.json", Handler.config) |> ignore
