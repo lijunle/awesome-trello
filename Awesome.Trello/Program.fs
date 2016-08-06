@@ -13,7 +13,7 @@ type Startup() =
     services
       .AddRouting()
       .AddDistributedMemoryCache()
-      .AddSession(fun options -> options.CookieName <- ".Awesome.Trello")
+      .AddSession(fun options -> options.CookieName <- App.name)
       |> ignore
 
   member __.Configure(app: IApplicationBuilder, env: IHostingEnvironment, loggerFactory: ILoggerFactory): unit =
@@ -25,7 +25,9 @@ type Startup() =
 
     let routerBuilder = RouteBuilder(app)
     routerBuilder.MapGet("", Handler.index) |> ignore
+    routerBuilder.MapGet("auth", Handler.auth) |> ignore
     routerBuilder.MapGet("index.js", Handler.javascript) |> ignore
+    routerBuilder.MapGet("config.js", Handler.config) |> ignore
     app.UseRouter(routerBuilder.Build()) |> ignore
 
 [<EntryPoint>]

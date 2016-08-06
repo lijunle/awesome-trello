@@ -4,7 +4,10 @@
   <title>Awesome Trello</title>
 </head>
 <body>
+  <a id="login">Login</a>
   <script src="index.js"></script>
+  <script src="config.js"></script>
+  <script>document.getElementById('login').href = config.loginUrl</script>
   <script>Elm.Main.fullscreen()</script>
 </body>
 </html>

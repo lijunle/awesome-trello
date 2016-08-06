@@ -5,6 +5,7 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
+        "Utils.fs",
         "Handler.fs",
         "Program.fs"
       ]
