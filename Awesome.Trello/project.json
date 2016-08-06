@@ -50,7 +50,6 @@
     ]
   },
   "scripts": {
-    "precompile": [ "elm package install -y", "elm make index.elm --output index.js --warn" ],
     "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
   }
 }
