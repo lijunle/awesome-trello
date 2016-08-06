@@ -1,6 +1,7 @@
 module Handler
 
 open Microsoft.AspNetCore.Http
+open Newtonsoft.Json
 open System.Threading.Tasks
 
 let index (context: HttpContext) =
@@ -16,6 +17,12 @@ let auth (context: HttpContext) =
 
 let javascript (context: HttpContext) =
   context.Response.SendFileAsync "index.js"
+
+type ConfigPayload = {
+  Name: string
+  LoginUrl: string
+  LogoutUrl: string
+}
 
 let config (context: HttpContext) =
   let schema = context.Request.Scheme
@@ -33,6 +40,11 @@ let config (context: HttpContext) =
   let queryString = query |> List.map (fun (key, value) -> sprintf "%s=%s" key value) |> String.concat "&"
   let loginUrl = sprintf "%s?%s" Trello.authUrl queryString
   let token = context.Session.GetString "token"
+  let config = {
+    Name = token // TODO
+    LoginUrl = loginUrl
+    LogoutUrl = "" // TODO
+  }
 
-  let content = sprintf "var config = { loginUrl: '%s', token: '%s' }" loginUrl token
+  let content = JsonConvert.SerializeObject(config)
   context.Response.WriteAsync content
