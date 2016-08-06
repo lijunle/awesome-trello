@@ -24,8 +24,7 @@ let login (context: HttpContext) =
     ("redirect_uri", sprintf "%s://%s/auth" schema host)
   ]
 
-  let queryString = query |> List.map (fun (key, value) -> sprintf "%s=%s" key value) |> String.concat "&"
-  let loginUrl = sprintf "%s?%s" Trello.authUrl queryString
+  let loginUrl = Url.build Trello.authUrl query
   Task.Run (fun () -> context.Response.Redirect loginUrl)
 
 let logout (context: HttpContext) =
@@ -49,7 +48,13 @@ type ConfigPayload = {
 
 let getName token =
   try
-    let memberUrl = sprintf "%s?fields=fullName&key=%s&token=%s" Trello.memberUrl Trello.key token // TODO query string
+    let query = [
+      ("fields", "fullName")
+      ("key", Trello.key)
+      ("token", token)
+    ]
+
+    let memberUrl = Url.build Trello.memberUrl query
     let result = httpClient.GetStringAsync(memberUrl).Result // TODO use async
     let name = JObject.Parse(result).["fullName"].ToString()
     Some name
