@@ -1,0 +1,10 @@
+<html>
+<body>
+  <script>
+    if (location.hash.indexOf('#token=') === 0) {
+      var token = location.hash.substr('#token='.length);
+      location.href = '/auth?token=' + token;
+    }
+  </script>
+</body>
+</html>
