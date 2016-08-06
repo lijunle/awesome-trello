@@ -29,15 +29,13 @@ type alias Url =
 
 type alias Config =
     { name : Maybe Name
-    , loginUrl : Url
-    , logoutUrl : Url
     }
 
 
 type Model
     = Init
-    | Login Url
-    | Logout Name Url
+    | Login
+    | Logout Name
 
 
 init : ( Model, Cmd Msg )
@@ -70,14 +68,14 @@ view model =
         Init ->
             text ""
 
-        Login url ->
-            a [ href url ] [ text "Login" ]
+        Login ->
+            a [ href "/login" ] [ text "Login" ]
 
-        Logout name url ->
+        Logout name ->
             div []
                 [ text "Hi, "
                 , text name
-                , a [ href url ] [ text "Logout" ]
+                , a [ href "/logout" ] [ text "Logout" ]
                 ]
 
 
@@ -99,16 +97,14 @@ toModel : Config -> Model
 toModel config =
     case config.name of
         Just name ->
-            Logout name config.logoutUrl
+            Logout name
 
         Nothing ->
-            Login config.loginUrl
+            Login
 
 
 decodeUrl : Json.Decoder Config
 decodeUrl =
-    Json.object3
+    Json.object1
         Config
         ("Name" := (Json.maybe Json.string))
-        ("LoginUrl" := Json.string)
-        ("LogoutUrl" := Json.string)

@@ -41,16 +41,12 @@ let javascript (context: HttpContext) =
 
 type ConfigPayload = {
   Name: string
-  LoginUrl: string
-  LogoutUrl: string
 }
 
 let config (context: HttpContext) =
   let token = context.Session.GetString "token"
   let config = {
     Name = token // TODO
-    LoginUrl = "/login"
-    LogoutUrl = "/logout"
   }
 
   let content = JsonConvert.SerializeObject(config)
