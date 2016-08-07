@@ -44,28 +44,31 @@ let javascript (context: HttpContext) =
 
 type ConfigPayload = {
   Name: string
+  Boards: string list
 }
 
-let getName token =
+let getInfo token : TrelloMember option =
   try
     let query = [
       ("fields", "fullName")
+      ("boards", "open")
       ("key", Trello.key)
       ("token", token)
     ]
 
     let memberUrl = Url.build Trello.memberUrl query
     let result = httpClient.GetStringAsync(memberUrl).Result // TODO use async
-    let name = JObject.Parse(result).["fullName"].ToString()
-    Some name
+    let memberInfo = JsonConvert.DeserializeObject<TrelloMember> result
+    Some memberInfo
   with e ->
     None
 
 let config (context: HttpContext) =
   let token = context.Session.GetString "token" |> Option.ofObj
-  let name = Option.bind getName token
+  let info = token |>> getInfo
   let config = {
-    Name = name |> Option.toObj
+    Name = info |>> (Trello.Member.fullName >> Some) |> Option.toObj
+    Boards = info |>> (Trello.Member.boards >> Some) |>> (List.map Trello.Board.name >> Some) |> Option.defaultValue []
   }
 
   let content = JsonConvert.SerializeObject(config)
