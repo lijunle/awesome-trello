@@ -63,6 +63,12 @@ let getInfo token : TrelloMember option =
   with e ->
     None
 
+let cacheBoard (context: HttpContext) (board: TrelloBoard) =
+  let boardName = Trello.Board.name board
+  let boardId = Trello.Board.id board
+  let boardKey = sprintf "BOARD_%s" boardName
+  context.Session.SetString (boardKey, boardId)
+
 let config (context: HttpContext) =
   let token = context.Session.GetString "token" |> Option.ofObj
   let info = token |>> getInfo
@@ -71,5 +77,32 @@ let config (context: HttpContext) =
     Boards = info |>> (Trello.Member.boards >> Some) |>> (List.map Trello.Board.name >> Some) |> Option.defaultValue []
   }
 
+  info
+    |>> (Trello.Member.boards >> Some)
+    |>> (List.forall (cacheBoard context >> always true) >> Some)
+    |> ignore
+
   let content = JsonConvert.SerializeObject(config)
+  context.Response.WriteAsync content
+
+let card (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardName = context.Request.Query.["board"].ToString()
+  let boardKey = sprintf "BOARD_%s" boardName
+  let boardId = context.Session.GetString boardKey
+
+  let query = [
+    ("filter", "open")
+    ("fields", "name")
+    ("members", "true")
+    ("member_fields", "")
+    ("key", Trello.key)
+    ("token", token)
+  ]
+
+  let listUrl = Url.build (Trello.cardUrl boardId) query
+  let result = httpClient.GetStringAsync(listUrl).Result // TODO use async
+  let cards = JsonConvert.DeserializeObject<TrelloCard list> result
+  let targetCards = cards |> List.filter (Trello.Card.members >> List.isEmpty) |> List.map Trello.Card.name
+  let content = JsonConvert.SerializeObject(targetCards)
   context.Response.WriteAsync content

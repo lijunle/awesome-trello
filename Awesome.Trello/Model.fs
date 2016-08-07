@@ -10,3 +10,13 @@ type TrelloMember = {
   fullName: string
   boards: TrelloBoard list
 }
+
+type TrelloCardMember = {
+  id: string
+}
+
+type TrelloCard = {
+  id: string
+  name: string
+  members: TrelloCardMember list
+}

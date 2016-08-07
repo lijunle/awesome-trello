@@ -30,6 +30,7 @@ type Startup() =
     routerBuilder.MapGet("auth", Handler.auth) |> ignore
     routerBuilder.MapGet("index.js", Handler.javascript) |> ignore
     routerBuilder.MapGet("config.json", Handler.config) |> ignore
+    routerBuilder.MapGet("card.json", Handler.card) |> ignore
     app.UseRouter(routerBuilder.Build()) |> ignore
 
 [<EntryPoint>]
