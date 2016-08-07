@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.App as App
 import Login
+import Board
 
 
 main : Program Never
@@ -16,7 +17,9 @@ main =
 
 
 type alias Model =
-    { login : Login.Model }
+    { login : Login.Model
+    , boards : Board.Model
+    }
 
 
 init : ( Model, Cmd Msg )
@@ -24,13 +27,29 @@ init =
     let
         ( loginModel, loginMsg ) =
             Login.init
+
+        ( boardModel, boardMsg ) =
+            Board.init
+
+        model =
+            Model loginModel boardModel
+
+        loginCmd =
+            Cmd.map LoginMsg loginMsg
+
+        boardCmd =
+            Cmd.map BoardMsg boardMsg
+
+        cmd =
+            Cmd.batch [ loginCmd, boardCmd ]
     in
-        ( Model loginModel, Cmd.map LoginMsg loginMsg )
+        ( model, cmd )
 
 
 type Msg
     = Init
     | LoginMsg Login.Msg
+    | BoardMsg Board.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -43,14 +62,30 @@ update msg model =
             let
                 ( loginModel, loginMsg ) =
                     Login.update msg model.login
+
+                newModel =
+                    { model | login = loginModel }
             in
-                ( Model loginModel, Cmd.map LoginMsg loginMsg )
+                ( newModel, Cmd.map LoginMsg loginMsg )
+
+        BoardMsg msg ->
+            let
+                boardModel =
+                    Board.update msg model.boards
+
+                newModel =
+                    { model | boards = boardModel }
+            in
+                ( newModel, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ App.map LoginMsg (Login.view model.login)
+        [ App.map LoginMsg
+            (Login.view model.login)
+        , App.map BoardMsg
+            (Board.view model.boards)
         ]
 
 
