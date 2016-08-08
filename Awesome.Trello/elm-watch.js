@@ -15,8 +15,8 @@ function runWatch(file) {
     if (isPackage(file)) {
       run(__dirname, ['elm package install --yes']);
     } else if (isElm(file)) {
-      var jsfile = path.basename(file, '.elm') + '.js';
-      run(__dirname, ['elm make --warn ' + file + ' --output ' + jsfile]);
+      console.log('Change file ' + file);
+      run(__dirname, ['elm make --warn index.elm --output index.js']);
     } else {
       // No-op
     }

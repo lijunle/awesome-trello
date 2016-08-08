@@ -1,17 +1,18 @@
-module Main exposing (..)
+module Main exposing (main)
 
+import Board
 import Html exposing (..)
-import Html.App as App
-import Html.Attributes exposing (..)
+import Html.App
 import Http
-import Json.Decode as Json
-import Json.Decode exposing ((:=))
+import Json.Decode
+import Login
+import Model exposing (..)
 import Task
 
 
 main : Program Never
 main =
-    App.program
+    Html.App.program
         { init = init
         , view = view
         , update = update
@@ -19,23 +20,16 @@ main =
         }
 
 
-type alias Name =
-    String
-
-
-type alias Url =
-    String
-
-
-type alias Config =
-    { name : Maybe Name
+type alias PageModel =
+    { login : Login.Model
+    , boards : Board.Model
     }
 
 
 type Model
     = Init
-    | Login
-    | Logout Name
+    | Error Http.Error
+    | Page PageModel
 
 
 init : ( Model, Cmd Msg )
@@ -44,38 +38,80 @@ init =
 
 
 type Msg
-    = GetConfig
+    = FetchFail Http.Error
     | FetchSucceed Config
-    | FetchFail Http.Error
+    | LoginMsg Login.Msg
+    | BoardMsg Board.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetConfig ->
-            ( model, getConfig )
+        FetchFail error ->
+            ( Error error, Cmd.none )
 
         FetchSucceed config ->
-            ( config |> toModel, Cmd.none )
+            let
+                loginModel =
+                    Login.init config
 
-        FetchFail error ->
-            ( model, Cmd.none )
+                ( boardModel, boardMsg ) =
+                    Board.init config
+
+                pageModel =
+                    { login = loginModel, boards = boardModel }
+            in
+                ( Page pageModel, Cmd.map BoardMsg boardMsg )
+
+        LoginMsg msg ->
+            case model of
+                Page pageModel ->
+                    let
+                        ( loginModel, loginMsg ) =
+                            Login.update msg pageModel.login
+
+                        newModel =
+                            { pageModel | login = loginModel }
+                    in
+                        ( Page newModel, Cmd.map LoginMsg loginMsg )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        BoardMsg msg ->
+            case model of
+                Page pageModel ->
+                    let
+                        ( boardModel, boardMsg ) =
+                            Board.update msg pageModel.boards
+
+                        newModel =
+                            { pageModel | boards = boardModel }
+                    in
+                        ( Page newModel, Cmd.map BoardMsg boardMsg )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
     case model of
         Init ->
-            text ""
+            div [] [ text "Loading..." ]
 
-        Login ->
-            a [ href "/login" ] [ text "Login" ]
-
-        Logout name ->
+        Error error ->
             div []
-                [ text "Hi, "
-                , text name
-                , a [ href "/logout" ] [ text "Logout" ]
+                [ text "Error happens: "
+                , text (toString error)
+                ]
+
+        Page pageModel ->
+            div []
+                [ Html.App.map LoginMsg
+                    (Login.view pageModel.login)
+                , Html.App.map BoardMsg
+                    (Board.view pageModel.boards)
                 ]
 
 
@@ -90,21 +126,15 @@ getConfig =
         url =
             "/config.json"
     in
-        Task.perform FetchFail FetchSucceed (Http.get decodeUrl url)
+        Task.perform
+            FetchFail
+            FetchSucceed
+            (Http.get decodeConfig url)
 
 
-toModel : Config -> Model
-toModel config =
-    case config.name of
-        Just name ->
-            Logout name
-
-        Nothing ->
-            Login
-
-
-decodeUrl : Json.Decoder Config
-decodeUrl =
-    Json.object1
+decodeConfig : Json.Decode.Decoder Config
+decodeConfig =
+    Json.Decode.object2
         Config
-        ("Name" := (Json.maybe Json.string))
+        (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
+        (Json.Decode.at [ "Boards" ] (Json.Decode.list Json.Decode.string))
