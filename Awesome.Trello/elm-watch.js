@@ -38,13 +38,11 @@ watch.watchTree(
   function (file, curr, prev) {
     if (typeof file == "object" && prev === null && curr === null) {
       // Finished walking the tree
-      var names = Object.keys(file);
-      names.forEach(function init(filename) {
-        runWatch(filename);
-      });
+      runWatch('elm-package.json');
+      runWatch('Index.elm');
 
       console.log('Start monitor the directory ' + __dirname);
-      names.forEach(function finish(filename) {
+      Object.keys(file).forEach(function finish(filename) {
         console.log('- ' + filename);
       });
     } else if (prev === null) {
