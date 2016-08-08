@@ -1,14 +1,18 @@
-module Main exposing (..)
+module Main exposing (main)
 
-import Html exposing (..)
-import Html.App as App
-import Login
 import Board
+import Html exposing (..)
+import Html.App
+import Http
+import Json.Decode
+import Login
+import Model exposing (..)
+import Task
 
 
 main : Program Never
 main =
-    App.program
+    Html.App.program
         { init = init
         , view = view
         , update = update
@@ -16,38 +20,26 @@ main =
         }
 
 
-type alias Model =
+type alias PageModel =
     { login : Login.Model
     , boards : Board.Model
     }
 
 
+type Model
+    = Init
+    | Error Http.Error
+    | Page PageModel
+
+
 init : ( Model, Cmd Msg )
 init =
-    let
-        ( loginModel, loginMsg ) =
-            Login.init
-
-        ( boardModel, boardMsg ) =
-            Board.init
-
-        model =
-            Model loginModel boardModel
-
-        loginCmd =
-            Cmd.map LoginMsg loginMsg
-
-        boardCmd =
-            Cmd.map BoardMsg boardMsg
-
-        cmd =
-            Cmd.batch [ loginCmd, boardCmd ]
-    in
-        ( model, cmd )
+    ( Init, getConfig )
 
 
 type Msg
-    = Init
+    = FetchFail Http.Error
+    | FetchSucceed Config
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
 
@@ -55,40 +47,94 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Init ->
-            ( model, Cmd.none )
+        FetchFail error ->
+            ( Error error, Cmd.none )
+
+        FetchSucceed config ->
+            let
+                loginModel =
+                    Login.init config
+
+                ( boardModel, boardMsg ) =
+                    Board.init config
+
+                pageModel =
+                    { login = loginModel, boards = boardModel }
+            in
+                ( Page pageModel, Cmd.map BoardMsg boardMsg )
 
         LoginMsg msg ->
-            let
-                ( loginModel, loginMsg ) =
-                    Login.update msg model.login
+            case model of
+                Page pageModel ->
+                    let
+                        ( loginModel, loginMsg ) =
+                            Login.update msg pageModel.login
 
-                newModel =
-                    { model | login = loginModel }
-            in
-                ( newModel, Cmd.map LoginMsg loginMsg )
+                        newModel =
+                            { pageModel | login = loginModel }
+                    in
+                        ( Page newModel, Cmd.map LoginMsg loginMsg )
+
+                _ ->
+                    ( model, Cmd.none )
 
         BoardMsg msg ->
-            let
-                ( boardModel, boardMsg ) =
-                    Board.update msg model.boards
+            case model of
+                Page pageModel ->
+                    let
+                        ( boardModel, boardMsg ) =
+                            Board.update msg pageModel.boards
 
-                newModel =
-                    { model | boards = boardModel }
-            in
-                ( newModel, Cmd.map BoardMsg boardMsg )
+                        newModel =
+                            { pageModel | boards = boardModel }
+                    in
+                        ( Page newModel, Cmd.map BoardMsg boardMsg )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ App.map LoginMsg
-            (Login.view model.login)
-        , App.map BoardMsg
-            (Board.view model.boards)
-        ]
+    case model of
+        Init ->
+            div [] [ text "Loading..." ]
+
+        Error error ->
+            div []
+                [ text "Error happens: "
+                , text (toString error)
+                ]
+
+        Page pageModel ->
+            div []
+                [ Html.App.map LoginMsg
+                    (Login.view pageModel.login)
+                , Html.App.map BoardMsg
+                    (Board.view pageModel.boards)
+                ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+getConfig : Cmd Msg
+getConfig =
+    let
+        url =
+            "/config.json"
+    in
+        Task.perform
+            FetchFail
+            FetchSucceed
+            (Http.get decodeConfig url)
+
+
+decodeConfig : Json.Decode.Decoder Config
+decodeConfig =
+    Json.Decode.object2
+        Config
+        (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
+        (Json.Decode.at [ "Boards" ] (Json.Decode.list Json.Decode.string))
