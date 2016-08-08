@@ -70,13 +70,13 @@ update msg model =
 
         BoardMsg msg ->
             let
-                boardModel =
+                ( boardModel, boardMsg ) =
                     Board.update msg model.boards
 
                 newModel =
                     { model | boards = boardModel }
             in
-                ( newModel, Cmd.none )
+                ( newModel, Cmd.map BoardMsg boardMsg )
 
 
 view : Model -> Html Msg
