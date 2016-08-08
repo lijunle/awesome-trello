@@ -16,7 +16,7 @@ function runWatch(file) {
       run(__dirname, ['elm package install --yes']);
     } else if (isElm(file)) {
       console.log('Change file ' + file);
-      run(__dirname, ['elm make --warn Index.elm --output index.js']);
+      run(__dirname, ['elm make --warn Index.elm --output ../Awesome.Trello/index.js']);
     } else {
       // No-op
     }
