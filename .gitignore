@@ -256,3 +256,6 @@ paket-files/
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+
+# temporary folder
+temp/

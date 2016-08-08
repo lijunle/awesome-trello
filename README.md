@@ -20,11 +20,17 @@ npm install
 dotnet restore
 ```
 
-Easy live commands:
+Easy development in watch mode. Open two terminals. One for:
+
+```sh
+cd Awesome.Trello.Pages
+node elm-watch.js
+```
+
+Another one for:
 
 ```sh
 cd Awesome.Trello
-node elm-watch.js
 dotnet watch run
 ```
 

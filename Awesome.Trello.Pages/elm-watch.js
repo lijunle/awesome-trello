@@ -16,7 +16,7 @@ function runWatch(file) {
       run(__dirname, ['elm package install --yes']);
     } else if (isElm(file)) {
       console.log('Change file ' + file);
-      run(__dirname, ['elm make --warn index.elm --output index.js']);
+      run(__dirname, ['elm make --warn Index.elm --output ../Awesome.Trello/index.js']);
     } else {
       // No-op
     }
@@ -38,13 +38,11 @@ watch.watchTree(
   function (file, curr, prev) {
     if (typeof file == "object" && prev === null && curr === null) {
       // Finished walking the tree
-      var names = Object.keys(file);
-      names.forEach(function init(filename) {
-        runWatch(filename);
-      });
+      runWatch('elm-package.json');
+      runWatch('Index.elm');
 
       console.log('Start monitor the directory ' + __dirname);
-      names.forEach(function finish(filename) {
+      Object.keys(file).forEach(function finish(filename) {
         console.log('- ' + filename);
       });
     } else if (prev === null) {
