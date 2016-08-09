@@ -32,6 +32,8 @@ module Trello =
     "https://api.trello.com/1/members/me"
   let cardUrl boardId =
     sprintf "https://api.trello.com/1/boards/%s/cards" boardId
+  let membersUrl boardId =
+    sprintf "https://api.trello.com/1/boards/%s/members/all" boardId
   let key =
     Environment.GetEnvironmentVariable "TRELLO_KEY"
 

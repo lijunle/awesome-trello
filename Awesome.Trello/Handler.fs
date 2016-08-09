@@ -85,11 +85,15 @@ let config (context: HttpContext) =
   let content = JsonConvert.SerializeObject(config)
   context.Response.WriteAsync content
 
-let card (context: HttpContext) =
-  let token = context.Session.GetString "token"
+let getBoardId (context: HttpContext) =
   let boardName = context.Request.Query.["board"].ToString()
   let boardKey = sprintf "BOARD_%s" boardName
   let boardId = context.Session.GetString boardKey
+  boardId
+
+let card (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardId = getBoardId context
 
   let query = [
     ("filter", "open")
@@ -106,3 +110,15 @@ let card (context: HttpContext) =
   let targetCards = cards |> List.filter (Trello.Card.members >> List.isEmpty) |> List.map Trello.Card.name
   let content = JsonConvert.SerializeObject(targetCards)
   context.Response.WriteAsync content
+
+let members (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardId = getBoardId context
+  let query = [
+    ("key", Trello.key)
+    ("token", token)
+  ]
+
+  let membersUrl = Url.build (Trello.membersUrl boardId) query
+  let result = httpClient.GetStringAsync(membersUrl).Result // TODO use async
+  context.Response.WriteAsync result
