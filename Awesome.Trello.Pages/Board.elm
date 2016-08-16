@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode
+import Json.Encode
 import Model exposing (..)
 import Task
 
@@ -24,6 +25,8 @@ type Msg
     | FetchMemberSucceed (List Member)
     | SelectBoard Board
     | SelectMember String
+    | Submit
+    | SubmitSucceed Bool
 
 
 init : Config -> ( Model, Cmd Msg )
@@ -94,6 +97,26 @@ update msg model =
             in
                 ( newModel, Cmd.none )
 
+        Submit ->
+            let
+                cmd =
+                    Maybe.map2
+                        assignBoard
+                        model.selectedBoard
+                        model.selectedMember
+                        |> Maybe.withDefault Cmd.none
+            in
+                ( model, cmd )
+
+        SubmitSucceed result ->
+            let
+                cmd =
+                    model.selectedBoard
+                        |> Maybe.map getCard
+                        |> Maybe.withDefault Cmd.none
+            in
+                ( model, cmd )
+
 
 view : Model -> Html Msg
 view model =
@@ -102,8 +125,9 @@ view model =
     else
         div []
             [ div []
-                [ (viewBoardSelector model.boards)
-                , (viewMemberSelector model.members)
+                [ viewBoardSelector model.boards
+                , viewMemberSelector model.members
+                , viewSubmitButton
                 ]
             , viewCardList model.cards
             ]
@@ -130,6 +154,12 @@ viewCardList cards =
             []
             (cards |> List.map (\x -> li [] [ text x ]))
         ]
+
+
+viewSubmitButton : Html Msg
+viewSubmitButton =
+    button [ onClick Submit ]
+        [ text "Submit" ]
 
 
 toModel : Config -> Model
@@ -173,3 +203,15 @@ decodeMemberList =
         (Json.Decode.at [ "id" ] Json.Decode.string)
         (Json.Decode.at [ "fullName" ] Json.Decode.string)
         |> Json.Decode.list
+
+
+assignBoard : Board -> Member -> Cmd Msg
+assignBoard board member =
+    let
+        url =
+            "/board/assign?board=" ++ board ++ "&member=" ++ member.id
+    in
+        Task.perform
+            FetchFail
+            SubmitSucceed
+            (Http.post Json.Decode.bool url Http.empty)
