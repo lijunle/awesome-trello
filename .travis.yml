@@ -18,6 +18,8 @@ script:
   - dotnet build ./Awesome.Trello -c Release
 
 before_deploy:
+  - git config user.email "build@travis-ci.org"
+  - git config user.name "Travis CI Build"
   - rm Awesome.Trello/.gitignore
   - git add . --all
   - git commit --amend --reuse-message HEAD
