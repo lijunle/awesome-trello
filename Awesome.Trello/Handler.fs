@@ -4,6 +4,7 @@ open Microsoft.AspNetCore.Http
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open System.Net.Http
+open System.Text
 open System.Threading.Tasks
 
 let httpClient = new HttpClient()
@@ -85,12 +86,13 @@ let config (context: HttpContext) =
   let content = JsonConvert.SerializeObject(config)
   context.Response.WriteAsync content
 
-let card (context: HttpContext) =
-  let token = context.Session.GetString "token"
+let getBoardId (context: HttpContext) =
   let boardName = context.Request.Query.["board"].ToString()
   let boardKey = sprintf "BOARD_%s" boardName
   let boardId = context.Session.GetString boardKey
+  boardId
 
+let getCards token board =
   let query = [
     ("filter", "open")
     ("fields", "name")
@@ -100,9 +102,52 @@ let card (context: HttpContext) =
     ("token", token)
   ]
 
-  let listUrl = Url.build (Trello.cardUrl boardId) query
+  let listUrl = Url.build (Trello.cardUrl board) query
   let result = httpClient.GetStringAsync(listUrl).Result // TODO use async
   let cards = JsonConvert.DeserializeObject<TrelloCard list> result
-  let targetCards = cards |> List.filter (Trello.Card.members >> List.isEmpty) |> List.map Trello.Card.name
-  let content = JsonConvert.SerializeObject(targetCards)
+  let targetCards = cards |> List.filter (Trello.Card.members >> List.isEmpty)
+  targetCards
+
+let card (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardId = getBoardId context
+  let targetCardNames = boardId |> getCards token |> List.map Trello.Card.name
+  let content = JsonConvert.SerializeObject(targetCardNames)
   context.Response.WriteAsync content
+
+let members (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardId = getBoardId context
+  let query = [
+    ("key", Trello.key)
+    ("token", token)
+  ]
+
+  let membersUrl = Url.build (Trello.membersUrl boardId) query
+  let result = httpClient.GetStringAsync(membersUrl).Result // TODO use async
+  context.Response.WriteAsync result
+
+let setMember token memberId card =
+  let query = [
+    ("key", Trello.key)
+    ("token", token)
+  ]
+
+  let url = Url.build (Trello.setMemberUrl card.id) query
+  let payload = sprintf "{\"value\":\"%s\"}" memberId
+  let content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+  httpClient.PutAsync (url, content)
+
+let assignBoard (context: HttpContext) =
+  let token = context.Session.GetString "token"
+  let boardId = getBoardId context
+  let memberId = context.Request.Query.["member"].ToString()
+  let targetCards = boardId |> getCards token
+
+  let requests = targetCards |> List.map (setMember token memberId)
+  try
+    Task.WhenAll requests |> ignore
+    context.Response.WriteAsync (true.ToString())
+  with e ->
+    context.Response.WriteAsync (false.ToString())
