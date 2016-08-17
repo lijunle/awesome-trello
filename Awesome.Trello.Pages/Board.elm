@@ -23,7 +23,7 @@ type Msg
     = FetchFail Http.Error
     | FetchCardSucceed (List Card)
     | FetchMemberSucceed (List Member)
-    | SelectBoard Board
+    | SelectBoard String
     | SelectMember String
     | Submit
     | SubmitSucceed Bool
@@ -78,12 +78,22 @@ update msg model =
             in
                 ( newModel, Cmd.none )
 
-        SelectBoard board ->
+        SelectBoard boardId ->
             let
+                board =
+                    model.boards
+                        |> List.filter (\x -> x.id == boardId)
+                        |> List.head
+
                 newModel =
-                    { model | selectedBoard = Just board }
+                    { model | selectedBoard = board }
+
+                cmd =
+                    board
+                        |> Maybe.map getCard
+                        |> Maybe.withDefault Cmd.none
             in
-                ( newModel, getCard board )
+                ( newModel, cmd )
 
         SelectMember memberId ->
             let
@@ -136,7 +146,7 @@ view model =
 viewBoardSelector : List Board -> Html Msg
 viewBoardSelector boards =
     select [ onInput SelectBoard ]
-        (boards |> List.map (\x -> option [] [ text x ]))
+        (boards |> List.map (\x -> option [ value x.id ] [ text x.name ]))
 
 
 viewMemberSelector : List Member -> Html Msg
@@ -176,7 +186,7 @@ getCard : Board -> Cmd Msg
 getCard board =
     let
         url =
-            "/card.json?board=" ++ board
+            "/card.json?board=" ++ board.name
     in
         Task.perform
             FetchFail
@@ -188,7 +198,7 @@ getMembers : Board -> Cmd Msg
 getMembers board =
     let
         url =
-            "/board-members.json?board=" ++ board
+            "/board-members.json?board=" ++ board.name
     in
         Task.perform
             FetchFail
@@ -209,7 +219,7 @@ assignBoard : Board -> Member -> Cmd Msg
 assignBoard board member =
     let
         url =
-            "/board/assign?board=" ++ board ++ "&member=" ++ member.id
+            "/board/assign?board=" ++ board.name ++ "&member=" ++ member.id
     in
         Task.perform
             FetchFail

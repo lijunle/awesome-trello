@@ -45,7 +45,7 @@ let javascript (context: HttpContext) =
 
 type ConfigPayload = {
   Name: string
-  Boards: string list
+  Boards: TrelloBoard list
 }
 
 let getInfo token : TrelloMember option =
@@ -75,7 +75,7 @@ let config (context: HttpContext) =
   let info = token |>> getInfo
   let config = {
     Name = info |>> (Trello.Member.fullName >> Some) |> Option.toObj
-    Boards = info |>> (Trello.Member.boards >> Some) |>> (List.map Trello.Board.name >> Some) |> Option.defaultValue []
+    Boards = info |>> (Trello.Member.boards >> Some) |> Option.defaultValue []
   }
 
   info

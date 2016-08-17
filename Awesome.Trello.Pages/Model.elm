@@ -10,7 +10,9 @@ type alias Name =
 
 
 type alias Board =
-    String
+    { id : String
+    , name : String
+    }
 
 
 type alias Card =
