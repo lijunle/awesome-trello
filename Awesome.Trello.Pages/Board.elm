@@ -11,7 +11,8 @@ import Task
 
 
 type alias Model =
-    { boards : List Board
+    { token : String
+    , boards : List Board
     , members : List Member
     , cards : List Card
     , selectedBoard : Maybe Board
@@ -175,6 +176,7 @@ viewSubmitButton =
 toModel : Config -> Model
 toModel config =
     Model
+        (config.token |> Maybe.withDefault "")
         config.boards
         []
         []

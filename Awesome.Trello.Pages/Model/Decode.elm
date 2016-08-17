@@ -14,7 +14,8 @@ board =
 
 config : Json.Decode.Decoder Config
 config =
-    Json.Decode.object2
+    Json.Decode.object3
         Config
+        (Json.Decode.at [ "Token" ] (Json.Decode.maybe Json.Decode.string))
         (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
         (Json.Decode.at [ "Boards" ] (Json.Decode.list board))

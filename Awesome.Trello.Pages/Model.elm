@@ -26,6 +26,7 @@ type alias Member =
 
 
 type alias Config =
-    { name : Maybe Name
+    { token : Maybe String
+    , name : Maybe Name
     , boards : List Board
     }
