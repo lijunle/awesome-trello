@@ -5,11 +5,7 @@ import Json.Decode
 import Model exposing (..)
 import Model.Decode
 import Task
-
-
-key : String
-key =
-    ""
+import Trello
 
 
 getBoardMembers : String -> Board -> Task.Task Http.Error (List Member)
@@ -19,7 +15,7 @@ getBoardMembers token board =
             "https://api.trello.com/1/boards/" ++ board.id ++ "/members"
 
         query =
-            [ ( "key", key )
+            [ ( "key", Trello.key )
             , ( "token", token )
             , ( "filter", "all" )
             , ( "fields", "fullName" )

@@ -1,4 +1,5 @@
 var run = require('../build/run');
+var patch = require('../build/patch');
 
 var commands = [
   'elm package install --yes',
@@ -7,3 +8,4 @@ var commands = [
 ];
 
 run(__dirname, commands);
+patch(__dirname, '../Awesome.Trello/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
