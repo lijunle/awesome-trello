@@ -12,6 +12,14 @@ board =
         (Json.Decode.at [ "name" ] Json.Decode.string)
 
 
+member : Json.Decode.Decoder Member
+member =
+    Json.Decode.object2
+        Member
+        (Json.Decode.at [ "id" ] Json.Decode.string)
+        (Json.Decode.at [ "fullName" ] Json.Decode.string)
+
+
 config : Json.Decode.Decoder Config
 config =
     Json.Decode.object3

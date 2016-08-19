@@ -5,8 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode
-import Json.Encode
 import Model exposing (..)
+import Request
 import Task
 
 
@@ -44,13 +44,13 @@ init config =
                 |> Maybe.map getCard
                 |> Maybe.withDefault Cmd.none
 
-        getMembersCmd =
+        getBoardMembersCmd =
             firstBoard
-                |> Maybe.map getMembers
+                |> Maybe.map (getBoardMembers model.token)
                 |> Maybe.withDefault Cmd.none
 
         cmd =
-            Cmd.batch [ getCardCmd, getMembersCmd ]
+            Cmd.batch [ getCardCmd, getBoardMembersCmd ]
     in
         ( model, cmd )
 
@@ -196,25 +196,10 @@ getCard board =
             (Http.get (Json.Decode.list Json.Decode.string) url)
 
 
-getMembers : Board -> Cmd Msg
-getMembers board =
-    let
-        url =
-            "/board-members.json?board=" ++ board.name
-    in
-        Task.perform
-            FetchFail
-            FetchMemberSucceed
-            (Http.get decodeMemberList url)
-
-
-decodeMemberList : Json.Decode.Decoder (List Member)
-decodeMemberList =
-    Json.Decode.object2
-        Member
-        (Json.Decode.at [ "id" ] Json.Decode.string)
-        (Json.Decode.at [ "fullName" ] Json.Decode.string)
-        |> Json.Decode.list
+getBoardMembers : String -> Board -> Cmd Msg
+getBoardMembers token board =
+    Request.getBoardMembers token board
+        |> Task.perform FetchFail FetchMemberSucceed
 
 
 assignBoard : Board -> Member -> Cmd Msg
