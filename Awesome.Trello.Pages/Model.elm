@@ -25,6 +25,7 @@ type alias Card =
 type alias Member =
     { id : Id
     , fullName : Name
+    , boards : List Board
     }
 
 
