@@ -12,6 +12,15 @@ board =
         (Json.Decode.at [ "name" ] Json.Decode.string)
 
 
+card : Json.Decode.Decoder Card
+card =
+    Json.Decode.object3
+        Card
+        (Json.Decode.at [ "id" ] Json.Decode.string)
+        (Json.Decode.at [ "name" ] Json.Decode.string)
+        (Json.Decode.at [ "idMembers" ] (Json.Decode.list Json.Decode.string))
+
+
 member : Json.Decode.Decoder Member
 member =
     Json.Decode.object2

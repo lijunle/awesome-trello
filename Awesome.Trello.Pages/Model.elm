@@ -16,7 +16,10 @@ type alias Board =
 
 
 type alias Card =
-    String
+    { id : Id
+    , name : Name
+    , idMembers : List String
+    }
 
 
 type alias Member =

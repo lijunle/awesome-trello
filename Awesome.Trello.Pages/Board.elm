@@ -41,7 +41,7 @@ init config =
 
         getCardCmd =
             firstBoard
-                |> Maybe.map getCard
+                |> Maybe.map (getCard model.token)
                 |> Maybe.withDefault Cmd.none
 
         getBoardMembersCmd =
@@ -64,8 +64,11 @@ update msg model =
 
         FetchCardSucceed cardList ->
             let
+                targetList =
+                    cardList |> List.filter (\x -> List.isEmpty x.idMembers)
+
                 newModel =
-                    { model | cards = cardList }
+                    { model | cards = targetList }
             in
                 ( newModel, Cmd.none )
 
@@ -91,7 +94,7 @@ update msg model =
 
                 cmd =
                     board
-                        |> Maybe.map getCard
+                        |> Maybe.map (getCard model.token)
                         |> Maybe.withDefault Cmd.none
             in
                 ( newModel, cmd )
@@ -123,7 +126,7 @@ update msg model =
             let
                 cmd =
                     model.selectedBoard
-                        |> Maybe.map getCard
+                        |> Maybe.map (getCard model.token)
                         |> Maybe.withDefault Cmd.none
             in
                 ( model, cmd )
@@ -163,7 +166,7 @@ viewCardList cards =
             [ text "Affecting cards" ]
         , ul
             []
-            (cards |> List.map (\x -> li [] [ text x ]))
+            (cards |> List.map (\x -> li [] [ text x.name ]))
         ]
 
 
@@ -184,16 +187,10 @@ toModel config =
         Nothing
 
 
-getCard : Board -> Cmd Msg
-getCard board =
-    let
-        url =
-            "/card.json?board=" ++ board.name
-    in
-        Task.perform
-            FetchFail
-            FetchCardSucceed
-            (Http.get (Json.Decode.list Json.Decode.string) url)
+getCard : String -> Board -> Cmd Msg
+getCard token board =
+    Request.getBoardCards token board
+        |> Task.perform FetchFail FetchCardSucceed
 
 
 getBoardMembers : String -> Board -> Cmd Msg
