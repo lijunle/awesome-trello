@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode
 import Model exposing (..)
 import Request
 import Task
@@ -27,7 +26,6 @@ type Msg
     | SelectBoard String
     | SelectMember String
     | Submit
-    | SubmitSucceed Bool
 
 
 init : Config -> ( Model, Cmd Msg )
@@ -114,20 +112,15 @@ update msg model =
         Submit ->
             let
                 cmd =
-                    Maybe.map2
-                        assignBoard
-                        model.selectedBoard
-                        model.selectedMember
-                        |> Maybe.withDefault Cmd.none
-            in
-                ( model, cmd )
+                    case model.selectedMember of
+                        Nothing ->
+                            Cmd.none
 
-        SubmitSucceed result ->
-            let
-                cmd =
-                    model.selectedBoard
-                        |> Maybe.map (getCard model.token)
-                        |> Maybe.withDefault Cmd.none
+                        Just selectedMember ->
+                            setCardsMember
+                                model.token
+                                selectedMember
+                                model.cards
             in
                 ( model, cmd )
 
@@ -199,13 +192,10 @@ getBoardMembers token board =
         |> Task.perform FetchFail FetchMemberSucceed
 
 
-assignBoard : Board -> Member -> Cmd Msg
-assignBoard board member =
-    let
-        url =
-            "/board/assign?board=" ++ board.name ++ "&member=" ++ member.id
-    in
-        Task.perform
-            FetchFail
-            SubmitSucceed
-            (Http.post Json.Decode.bool url Http.empty)
+setCardsMember : String -> Member -> List Card -> Cmd Msg
+setCardsMember token member cards =
+    {- TODO run tasks simultanously -}
+    cards
+        |> List.map (Request.setCardMember token member)
+        |> Task.sequence
+        |> Task.perform FetchFail FetchCardSucceed

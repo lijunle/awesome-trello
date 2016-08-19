@@ -2,10 +2,30 @@ module Request exposing (..)
 
 import Http
 import Json.Decode
+import Json.Encode
 import Model exposing (..)
 import Model.Decode
 import Task
 import Trello
+
+
+put : String -> Json.Decode.Decoder a -> Json.Encode.Value -> Task.Task Http.Error a
+put url decoder payload =
+    let
+        body =
+            payload
+                |> Json.Encode.encode 0
+                |> Http.string
+
+        request =
+            { verb = "PUT"
+            , headers = [ ( "Content-Type", "application/json" ) ]
+            , url = url
+            , body = body
+            }
+    in
+        Http.send Http.defaultSettings request
+            |> Http.fromJson decoder
 
 
 patchToken : String -> List ( String, String ) -> List ( String, String )
@@ -64,3 +84,25 @@ getBoardMembers token board =
             Json.Decode.list Model.Decode.member
     in
         Http.get memberList url
+
+
+setCardMember : String -> Member -> Card -> Task.Task Http.Error Card
+setCardMember token member card =
+    let
+        baseUrl =
+            "cards/" ++ card.id ++ "/idMembers" |> toBaseUrl
+
+        query =
+            [] |> patchToken token
+
+        url =
+            Http.url baseUrl query
+
+        cardDecoder =
+            Model.Decode.card
+
+        body =
+            [ ( "value", Json.Encode.string member.id ) ]
+                |> Json.Encode.object
+    in
+        put url cardDecoder body
