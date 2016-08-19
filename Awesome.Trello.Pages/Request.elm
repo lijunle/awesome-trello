@@ -8,18 +8,33 @@ import Task
 import Trello
 
 
+patchToken : String -> List ( String, String ) -> List ( String, String )
+patchToken token query =
+    let
+        common =
+            [ ( "key", Trello.key )
+            , ( "token", token )
+            ]
+    in
+        List.concat [ common, query ]
+
+
+toBaseUrl : String -> String
+toBaseUrl endPoint =
+    "https://api.trello.com/1/" ++ endPoint
+
+
 getBoardCards : String -> Board -> Task.Task Http.Error (List Card)
 getBoardCards token board =
     let
         baseUrl =
-            "https://api.trello.com/1/boards/" ++ board.id ++ "/cards"
+            "boards/" ++ board.id ++ "/cards" |> toBaseUrl
 
         query =
-            [ ( "key", Trello.key )
-            , ( "token", token )
-            , ( "filter", "open" )
+            [ ( "filter", "open" )
             , ( "fields", "name,idMembers" )
             ]
+                |> patchToken token
 
         url =
             Http.url baseUrl query
@@ -34,14 +49,13 @@ getBoardMembers : String -> Board -> Task.Task Http.Error (List Member)
 getBoardMembers token board =
     let
         baseUrl =
-            "https://api.trello.com/1/boards/" ++ board.id ++ "/members"
+            "boards/" ++ board.id ++ "/members" |> toBaseUrl
 
         query =
-            [ ( "key", Trello.key )
-            , ( "token", token )
-            , ( "filter", "all" )
+            [ ( "filter", "all" )
             , ( "fields", "fullName" )
             ]
+                |> patchToken token
 
         url =
             Http.url baseUrl query
