@@ -4,14 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode
-import Json.Encode
 import Model exposing (..)
+import Request
 import Task
 
 
 type alias Model =
-    { boards : List Board
+    { token : String
+    , boards : List Board
     , members : List Member
     , cards : List Card
     , selectedBoard : Maybe Board
@@ -23,10 +23,9 @@ type Msg
     = FetchFail Http.Error
     | FetchCardSucceed (List Card)
     | FetchMemberSucceed (List Member)
-    | SelectBoard Board
+    | SelectBoard String
     | SelectMember String
     | Submit
-    | SubmitSucceed Bool
 
 
 init : Config -> ( Model, Cmd Msg )
@@ -40,16 +39,16 @@ init config =
 
         getCardCmd =
             firstBoard
-                |> Maybe.map getCard
+                |> Maybe.map (getCard model.token)
                 |> Maybe.withDefault Cmd.none
 
-        getMembersCmd =
+        getBoardMembersCmd =
             firstBoard
-                |> Maybe.map getMembers
+                |> Maybe.map (getBoardMembers model.token)
                 |> Maybe.withDefault Cmd.none
 
         cmd =
-            Cmd.batch [ getCardCmd, getMembersCmd ]
+            Cmd.batch [ getCardCmd, getBoardMembersCmd ]
     in
         ( model, cmd )
 
@@ -63,8 +62,11 @@ update msg model =
 
         FetchCardSucceed cardList ->
             let
+                targetList =
+                    cardList |> List.filter (\x -> List.isEmpty x.idMembers)
+
                 newModel =
-                    { model | cards = cardList }
+                    { model | cards = targetList }
             in
                 ( newModel, Cmd.none )
 
@@ -78,12 +80,22 @@ update msg model =
             in
                 ( newModel, Cmd.none )
 
-        SelectBoard board ->
+        SelectBoard boardId ->
             let
+                board =
+                    model.boards
+                        |> List.filter (\x -> x.id == boardId)
+                        |> List.head
+
                 newModel =
-                    { model | selectedBoard = Just board }
+                    { model | selectedBoard = board }
+
+                cmd =
+                    board
+                        |> Maybe.map (getCard model.token)
+                        |> Maybe.withDefault Cmd.none
             in
-                ( newModel, getCard board )
+                ( newModel, cmd )
 
         SelectMember memberId ->
             let
@@ -100,20 +112,15 @@ update msg model =
         Submit ->
             let
                 cmd =
-                    Maybe.map2
-                        assignBoard
-                        model.selectedBoard
-                        model.selectedMember
-                        |> Maybe.withDefault Cmd.none
-            in
-                ( model, cmd )
+                    case model.selectedMember of
+                        Nothing ->
+                            Cmd.none
 
-        SubmitSucceed result ->
-            let
-                cmd =
-                    model.selectedBoard
-                        |> Maybe.map getCard
-                        |> Maybe.withDefault Cmd.none
+                        Just selectedMember ->
+                            setCardsMember
+                                model.token
+                                selectedMember
+                                model.cards
             in
                 ( model, cmd )
 
@@ -136,7 +143,7 @@ view model =
 viewBoardSelector : List Board -> Html Msg
 viewBoardSelector boards =
     select [ onInput SelectBoard ]
-        (boards |> List.map (\x -> option [] [ text x ]))
+        (boards |> List.map (\x -> option [ value x.id ] [ text x.name ]))
 
 
 viewMemberSelector : List Member -> Html Msg
@@ -152,7 +159,7 @@ viewCardList cards =
             [ text "Affecting cards" ]
         , ul
             []
-            (cards |> List.map (\x -> li [] [ text x ]))
+            (cards |> List.map (\x -> li [] [ text x.name ]))
         ]
 
 
@@ -165,6 +172,7 @@ viewSubmitButton =
 toModel : Config -> Model
 toModel config =
     Model
+        (config.token |> Maybe.withDefault "")
         config.boards
         []
         []
@@ -172,46 +180,22 @@ toModel config =
         Nothing
 
 
-getCard : Board -> Cmd Msg
-getCard board =
-    let
-        url =
-            "/card.json?board=" ++ board
-    in
-        Task.perform
-            FetchFail
-            FetchCardSucceed
-            (Http.get (Json.Decode.list Json.Decode.string) url)
+getCard : String -> Board -> Cmd Msg
+getCard token board =
+    Request.getBoardCards token board
+        |> Task.perform FetchFail FetchCardSucceed
 
 
-getMembers : Board -> Cmd Msg
-getMembers board =
-    let
-        url =
-            "/board-members.json?board=" ++ board
-    in
-        Task.perform
-            FetchFail
-            FetchMemberSucceed
-            (Http.get decodeMemberList url)
+getBoardMembers : String -> Board -> Cmd Msg
+getBoardMembers token board =
+    Request.getBoardMembers token board
+        |> Task.perform FetchFail FetchMemberSucceed
 
 
-decodeMemberList : Json.Decode.Decoder (List Member)
-decodeMemberList =
-    Json.Decode.object2
-        Member
-        (Json.Decode.at [ "id" ] Json.Decode.string)
-        (Json.Decode.at [ "fullName" ] Json.Decode.string)
-        |> Json.Decode.list
-
-
-assignBoard : Board -> Member -> Cmd Msg
-assignBoard board member =
-    let
-        url =
-            "/board/assign?board=" ++ board ++ "&member=" ++ member.id
-    in
-        Task.perform
-            FetchFail
-            SubmitSucceed
-            (Http.post Json.Decode.bool url Http.empty)
+setCardsMember : String -> Member -> List Card -> Cmd Msg
+setCardsMember token member cards =
+    {- TODO run tasks simultanously -}
+    cards
+        |> List.map (Request.setCardMember token member)
+        |> Task.sequence
+        |> Task.perform FetchFail FetchCardSucceed

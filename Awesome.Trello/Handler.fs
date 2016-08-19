@@ -44,8 +44,9 @@ let javascript (context: HttpContext) =
   context.Response.SendFileAsync "index.js"
 
 type ConfigPayload = {
+  Token: string
   Name: string
-  Boards: string list
+  Boards: TrelloBoard list
 }
 
 let getInfo token : TrelloMember option =
@@ -74,8 +75,9 @@ let config (context: HttpContext) =
   let token = context.Session.GetString "token" |> Option.ofObj
   let info = token |>> getInfo
   let config = {
+    Token = token |> Option.toObj
     Name = info |>> (Trello.Member.fullName >> Some) |> Option.toObj
-    Boards = info |>> (Trello.Member.boards >> Some) |>> (List.map Trello.Board.name >> Some) |> Option.defaultValue []
+    Boards = info |>> (Trello.Member.boards >> Some) |> Option.defaultValue []
   }
 
   info

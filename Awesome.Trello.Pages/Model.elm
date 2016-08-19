@@ -10,11 +10,16 @@ type alias Name =
 
 
 type alias Board =
-    String
+    { id : String
+    , name : String
+    }
 
 
 type alias Card =
-    String
+    { id : Id
+    , name : Name
+    , idMembers : List String
+    }
 
 
 type alias Member =
@@ -24,6 +29,7 @@ type alias Member =
 
 
 type alias Config =
-    { name : Maybe Name
+    { token : Maybe String
+    , name : Maybe Name
     , boards : List Board
     }

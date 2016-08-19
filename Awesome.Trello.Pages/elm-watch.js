@@ -1,6 +1,7 @@
 var path = require('path');
 var watch = require('watch');
 var run = require('../build/run');
+var patch = require('../build/patch');
 
 function isPackage(file) {
   return path.basename(file) === 'elm-package.json';
@@ -17,6 +18,7 @@ function runWatch(file) {
     } else if (isElm(file)) {
       console.log('Change file ' + file);
       run(__dirname, ['elm make --warn Index.elm --output ../Awesome.Trello/index.js']);
+      patch(__dirname, '../Awesome.Trello/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
     } else {
       // No-op
     }

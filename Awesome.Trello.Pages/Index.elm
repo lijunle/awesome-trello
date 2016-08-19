@@ -4,9 +4,9 @@ import Board
 import Html exposing (..)
 import Html.App
 import Http
-import Json.Decode
 import Login
 import Model exposing (..)
+import Model.Decode
 import Task
 
 
@@ -129,12 +129,4 @@ getConfig =
         Task.perform
             FetchFail
             FetchSucceed
-            (Http.get decodeConfig url)
-
-
-decodeConfig : Json.Decode.Decoder Config
-decodeConfig =
-    Json.Decode.object2
-        Config
-        (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
-        (Json.Decode.at [ "Boards" ] (Json.Decode.list Json.Decode.string))
+            (Http.get Model.Decode.config url)
