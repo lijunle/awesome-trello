@@ -1,5 +1,7 @@
 module Model exposing (..)
 
+{- TODO add strong type Id, Name and Token -}
+
 
 type alias Id =
     String
