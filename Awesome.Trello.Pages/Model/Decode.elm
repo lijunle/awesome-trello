@@ -47,12 +47,3 @@ member =
                 |> Json.Decode.map (Maybe.withDefault [])
     in
         Json.Decode.object3 Member id fullName boardsWithDefault
-
-
-config : Json.Decode.Decoder Config
-config =
-    Json.Decode.object3
-        Config
-        (Json.Decode.at [ "Token" ] (Json.Decode.maybe Json.Decode.string))
-        (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
-        (Json.Decode.at [ "Boards" ] (Json.Decode.list board))

@@ -44,6 +44,27 @@ toBaseUrl endPoint =
     "https://api.trello.com/1/" ++ endPoint
 
 
+getMemberMe : String -> Task.Task Http.Error Member
+getMemberMe token =
+    let
+        baseUrl =
+            "members/me" |> toBaseUrl
+
+        query =
+            [ ( "fields", "fullName" )
+            , ( "boards", "open" )
+            ]
+                |> patchToken token
+
+        url =
+            Http.url baseUrl query
+
+        member =
+            Model.Decode.member
+    in
+        Http.get member url
+
+
 getBoardCards : String -> Board -> Task.Task Http.Error (List Card)
 getBoardCards token board =
     let

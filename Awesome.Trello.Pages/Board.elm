@@ -28,11 +28,11 @@ type Msg
     | Submit
 
 
-init : Config -> ( Model, Cmd Msg )
-init config =
+init : String -> Member -> ( Model, Cmd Msg )
+init token member =
     let
         model =
-            config |> toModel
+            member |> toModel token
 
         firstBoard =
             List.head model.boards
@@ -127,17 +127,14 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    if List.isEmpty model.boards then
-        div [] []
-    else
-        div []
-            [ div []
-                [ viewBoardSelector model.boards
-                , viewMemberSelector model.members
-                , viewSubmitButton
-                ]
-            , viewCardList model.cards
+    div []
+        [ div []
+            [ viewBoardSelector model.boards
+            , viewMemberSelector model.members
+            , viewSubmitButton
             ]
+        , viewCardList model.cards
+        ]
 
 
 viewBoardSelector : List Board -> Html Msg
@@ -169,14 +166,14 @@ viewSubmitButton =
         [ text "Submit" ]
 
 
-toModel : Config -> Model
-toModel config =
+toModel : String -> Member -> Model
+toModel token member =
     Model
-        (config.token |> Maybe.withDefault "")
-        config.boards
+        token
+        member.boards
         []
         []
-        (List.head config.boards)
+        (List.head member.boards)
         Nothing
 
 

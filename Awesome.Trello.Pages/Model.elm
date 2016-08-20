@@ -29,8 +29,5 @@ type alias Member =
     }
 
 
-type alias Config =
-    { token : Maybe String
-    , name : Maybe Name
-    , boards : List Board
-    }
+type alias Page =
+    Maybe ( String, Member )

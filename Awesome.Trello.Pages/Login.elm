@@ -15,9 +15,14 @@ type Msg
     | LogoutMsg
 
 
-init : Config -> Model
-init config =
-    config |> toModel
+init : Maybe Name -> Model
+init maybeName =
+    case maybeName of
+        Nothing ->
+            Login
+
+        Just name ->
+            Logout name
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -39,13 +44,3 @@ view model =
                 , text " "
                 , a [ href "/logout" ] [ text "Logout" ]
                 ]
-
-
-toModel : Config -> Model
-toModel config =
-    case config.name of
-        Just name ->
-            Logout name
-
-        Nothing ->
-            Login
