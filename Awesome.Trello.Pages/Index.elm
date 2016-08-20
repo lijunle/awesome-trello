@@ -4,9 +4,10 @@ import Board
 import Html exposing (..)
 import Html.App
 import Http
+import Json.Decode
 import Login
 import Model exposing (..)
-import Model.Decode
+import Request
 import Task
 
 
@@ -29,6 +30,7 @@ type alias PageModel =
 type Model
     = Init
     | Error Http.Error
+    | Login Login.Model
     | Page PageModel
 
 
@@ -39,7 +41,7 @@ init =
 
 type Msg
     = FetchFail Http.Error
-    | FetchSucceed Config
+    | FetchSucceed Page
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
 
@@ -50,18 +52,23 @@ update msg model =
         FetchFail error ->
             ( Error error, Cmd.none )
 
-        FetchSucceed config ->
-            let
-                loginModel =
-                    Login.init config
+        FetchSucceed page ->
+            case page of
+                Nothing ->
+                    ( Login (Login.init Nothing), Cmd.none )
 
-                ( boardModel, boardMsg ) =
-                    Board.init config
+                Just ( token, member ) ->
+                    let
+                        loginModel =
+                            Login.init (Just member.fullName)
 
-                pageModel =
-                    { login = loginModel, boards = boardModel }
-            in
-                ( Page pageModel, Cmd.map BoardMsg boardMsg )
+                        ( boardModel, boardMsg ) =
+                            Board.init token member
+
+                        pageModel =
+                            { login = loginModel, boards = boardModel }
+                    in
+                        ( Page pageModel, Cmd.map BoardMsg boardMsg )
 
         LoginMsg msg ->
             case model of
@@ -106,13 +113,19 @@ view model =
                 , text (toString error)
                 ]
 
+        Login loginModel ->
+            viewLogin loginModel
+
         Page pageModel ->
             div []
-                [ Html.App.map LoginMsg
-                    (Login.view pageModel.login)
-                , Html.App.map BoardMsg
-                    (Board.view pageModel.boards)
+                [ (viewLogin pageModel.login)
+                , Board.view pageModel.boards |> Html.App.map BoardMsg
                 ]
+
+
+viewLogin : Login.Model -> Html Msg
+viewLogin loginModel =
+    Login.view loginModel |> Html.App.map LoginMsg
 
 
 subscriptions : Model -> Sub Msg
@@ -122,11 +135,28 @@ subscriptions model =
 
 getConfig : Cmd Msg
 getConfig =
+    Task.andThen getToken getMemberMe
+        |> Task.perform FetchFail FetchSucceed
+
+
+getToken : Task.Task Http.Error (Maybe String)
+getToken =
     let
         url =
             "/config.json"
+
+        token =
+            Json.Decode.at [ "Token" ] (Json.Decode.maybe Json.Decode.string)
     in
-        Task.perform
-            FetchFail
-            FetchSucceed
-            (Http.get Model.Decode.config url)
+        Http.get token url
+
+
+getMemberMe : Maybe String -> Task.Task Http.Error Page
+getMemberMe maybeToken =
+    case maybeToken of
+        Nothing ->
+            Task.succeed Nothing
+
+        Just token ->
+            Request.getMemberMe token
+                |> Task.map (\member -> Just ( token, member ))

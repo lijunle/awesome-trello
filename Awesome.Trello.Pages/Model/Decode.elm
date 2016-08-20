@@ -29,6 +29,11 @@ board =
     Json.Decode.object2 Board id name
 
 
+boards : Json.Decode.Decoder (List Board)
+boards =
+    Json.Decode.at [ "boards" ] (Json.Decode.list board)
+
+
 card : Json.Decode.Decoder Card
 card =
     Json.Decode.object3 Card id name idMembers
@@ -36,13 +41,9 @@ card =
 
 member : Json.Decode.Decoder Member
 member =
-    Json.Decode.object2 Member id fullName
-
-
-config : Json.Decode.Decoder Config
-config =
-    Json.Decode.object3
-        Config
-        (Json.Decode.at [ "Token" ] (Json.Decode.maybe Json.Decode.string))
-        (Json.Decode.at [ "Name" ] (Json.Decode.maybe Json.Decode.string))
-        (Json.Decode.at [ "Boards" ] (Json.Decode.list board))
+    let
+        boardsWithDefault =
+            Json.Decode.maybe boards
+                |> Json.Decode.map (Maybe.withDefault [])
+    in
+        Json.Decode.object3 Member id fullName boardsWithDefault

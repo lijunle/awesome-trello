@@ -1,5 +1,7 @@
 module Model exposing (..)
 
+{- TODO add strong type Id, Name and Token -}
+
 
 type alias Id =
     String
@@ -25,11 +27,9 @@ type alias Card =
 type alias Member =
     { id : Id
     , fullName : Name
-    }
-
-
-type alias Config =
-    { token : Maybe String
-    , name : Maybe Name
     , boards : List Board
     }
+
+
+type alias Page =
+    Maybe ( String, Member )
