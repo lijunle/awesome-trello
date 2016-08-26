@@ -22,7 +22,7 @@ let login (context: HttpContext) =
     ("scope", "read,write,account")
     ("name", App.name)
     ("key", Trello.key)
-    ("redirect_uri", sprintf "%s://%s/auth" schema host)
+    ("redirect_uri", sprintf "%s://%s" schema host)
   ]
 
   let loginUrl = Url.build Trello.authUrl query
