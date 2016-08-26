@@ -33,7 +33,3 @@ type alias Member =
     , fullName : Name
     , boards : List Board
     }
-
-
-type alias Page =
-    Maybe ( String, Member )

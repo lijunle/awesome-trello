@@ -30,7 +30,7 @@ init =
 
 type Msg
     = FetchFail Http.Error
-    | FetchSucceed Page
+    | FetchSucceed ( String, Member )
     | GetToken (Maybe String)
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
@@ -42,23 +42,18 @@ update msg model =
         FetchFail error ->
             ( Error error, Cmd.none )
 
-        FetchSucceed page ->
-            case page of
-                Nothing ->
-                    ( Login (Login.init Nothing), Cmd.none )
+        FetchSucceed ( token, member ) ->
+            let
+                loginModel =
+                    Login.init (Just member.fullName)
 
-                Just ( token, member ) ->
-                    let
-                        loginModel =
-                            Login.init (Just member.fullName)
+                ( boardModel, boardMsg ) =
+                    Board.init token member
 
-                        ( boardModel, boardMsg ) =
-                            Board.init token member
-
-                        pageModel =
-                            { login = loginModel, boards = boardModel }
-                    in
-                        ( Page pageModel, Cmd.map BoardMsg boardMsg )
+                pageModel =
+                    { login = loginModel, boards = boardModel }
+            in
+                ( Page pageModel, Cmd.map BoardMsg boardMsg )
 
         GetToken token ->
             case token of
@@ -134,5 +129,5 @@ subscriptions tokenIncomingPort =
 getMemberMe : String -> Cmd Msg
 getMemberMe token =
     Request.getMemberMe token
-        |> Task.map (\member -> Just ( token, member ))
+        |> Task.map (\member -> ( token, member ))
         |> Task.perform FetchFail FetchSucceed
