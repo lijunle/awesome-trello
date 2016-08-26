@@ -5,6 +5,9 @@
 </head>
 <body>
   <script src="index.js"></script>
-  <script>Elm.Main.fullscreen()</script>
+  <script>
+    var app = Elm.Main.fullscreen();
+    app.ports.hashtag.send(window.location.hash);
+  </script>
 </body>
 </html>

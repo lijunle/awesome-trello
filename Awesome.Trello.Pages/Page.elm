@@ -32,6 +32,7 @@ init =
 type Msg
     = FetchFail Http.Error
     | FetchSucceed Page
+    | GetToken (Maybe String)
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
 
@@ -59,6 +60,9 @@ update msg model =
                             { login = loginModel, boards = boardModel }
                     in
                         ( Page pageModel, Cmd.map BoardMsg boardMsg )
+
+        GetToken token ->
+            ( model, Cmd.none )
 
         LoginMsg msg ->
             case model of
@@ -118,9 +122,9 @@ viewLogin loginModel =
     Login.view loginModel |> Html.App.map LoginMsg
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+subscriptions : IncomingPort (Maybe String) Msg -> Sub Msg
+subscriptions tokenIncomingPort =
+    tokenIncomingPort GetToken
 
 
 getConfig : Cmd Msg
