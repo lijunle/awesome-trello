@@ -4,7 +4,6 @@ import Board
 import Html exposing (..)
 import Html.App
 import Http
-import Json.Decode
 import Login
 import Model exposing (..)
 import Request
@@ -26,7 +25,7 @@ type Model
 
 init : ( Model, Cmd Msg )
 init =
-    ( Init, getConfig )
+    ( Init, Cmd.none )
 
 
 type Msg
@@ -62,7 +61,12 @@ update msg model =
                         ( Page pageModel, Cmd.map BoardMsg boardMsg )
 
         GetToken token ->
-            ( model, Cmd.none )
+            case token of
+                Nothing ->
+                    ( Login (Login.init Nothing), Cmd.none )
+
+                Just token ->
+                    ( Init, getMemberMe token )
 
         LoginMsg msg ->
             case model of
@@ -127,30 +131,8 @@ subscriptions tokenIncomingPort =
     tokenIncomingPort GetToken
 
 
-getConfig : Cmd Msg
-getConfig =
-    Task.andThen getToken getMemberMe
+getMemberMe : String -> Cmd Msg
+getMemberMe token =
+    Request.getMemberMe token
+        |> Task.map (\member -> Just ( token, member ))
         |> Task.perform FetchFail FetchSucceed
-
-
-getToken : Task.Task Http.Error (Maybe String)
-getToken =
-    let
-        url =
-            "/config.json"
-
-        token =
-            Json.Decode.at [ "Token" ] (Json.Decode.maybe Json.Decode.string)
-    in
-        Http.get token url
-
-
-getMemberMe : Maybe String -> Task.Task Http.Error Page
-getMemberMe maybeToken =
-    case maybeToken of
-        Nothing ->
-            Task.succeed Nothing
-
-        Just token ->
-            Request.getMemberMe token
-                |> Task.map (\member -> Just ( token, member ))
