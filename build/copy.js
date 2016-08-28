@@ -5,7 +5,7 @@ var mkdirp = require('mkdirp');
 function copyFile(from, to) {
   console.log('Copy file ' + from + ' to ' + to);
   mkdirp.sync(path.dirname(to));
-  fs.createReadStream(from).pipe(fs.createWriteStream(to));
+  fs.writeFileSync(to, fs.readFileSync(from));
 }
 
 function copyFolder(from, to) {
