@@ -17,7 +17,7 @@ function runWatch(file) {
       run(__dirname, ['elm package install --yes']);
     } else if (isElm(file)) {
       console.log('Change file ' + file);
-      run(__dirname, ['elm make --warn Index.elm --output ./dist/index.js']);
+      run(__dirname, 'elm make --warn Index.elm --output ./dist/index.js');
       patch(__dirname, './dist/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
       patch(__dirname, './dist/index.js', '{TRELLO_APP_NAME}', process.env.TRELLO_APP_NAME);
     } else {
