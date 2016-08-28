@@ -257,5 +257,5 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 
-# temporary folder
-temp/
+# Compile distination folder
+dist/
