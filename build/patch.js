@@ -10,5 +10,5 @@ module.exports = function(cwd, relativePath, pattern, replacement) {
   }
 
   fs.writeFileSync(filePath, fileContent, 'utf-8');
-  console.log('Patch file is done', relativePath);
+  console.log('Pattern ' + pattern + ' is patched on file ' + relativePath);
 };
