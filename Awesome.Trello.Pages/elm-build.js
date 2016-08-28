@@ -9,3 +9,4 @@ var commands = [
 
 run(__dirname, commands);
 patch(__dirname, '../Awesome.Trello/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
+patch(__dirname, '../Awesome.Trello/index.js', '{TRELLO_APP_NAME}', process.env.TRELLO_APP_NAME);
