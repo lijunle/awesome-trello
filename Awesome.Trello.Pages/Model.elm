@@ -3,6 +3,10 @@ module Model exposing (..)
 {- TODO add strong type Id, Name and Token -}
 
 
+type alias IncomingPort data msg =
+    (data -> msg) -> Sub msg
+
+
 type alias Id =
     String
 
@@ -29,7 +33,3 @@ type alias Member =
     , fullName : Name
     , boards : List Board
     }
-
-
-type alias Page =
-    Maybe ( String, Member )
