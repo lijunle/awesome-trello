@@ -7,8 +7,11 @@ var envPath = bin + path.delimiter + process.env.PATH;
 var envBag = process.platform === 'win32' ? { Path: envPath } : { PATH: envPath };
 var env = extend({}, process.env, envBag);
 
-module.exports = function run(cwd, command) {
-  console.log('> ' + command);
+module.exports = function run(cwd, command, options) {
+  options = options || {};
+
+  console.log('> ' + (options.showAs || command));
+
   execSync(command, {
     cwd: cwd,
     env: env,
