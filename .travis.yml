@@ -1,29 +1,21 @@
 sudo: required
 dist: trusty
 
-script:
-  # Install dotnet core
-  - sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-  - sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-  - sudo apt-get update
-  - sudo apt-get install dotnet-dev-1.0.0-preview2-003121 --yes
-  # Install node.js packages
-  - npm install --production
-  # Build ELM code
-  - node Awesome.Trello.Pages/elm-build.js
-  # Print dotnet core info
-  - dotnet --info
-  # Build dotnet core solution
-  - dotnet restore
-  - dotnet build ./Awesome.Trello -c Release
+language: node_js
+node_js:
+  - node
 
-before_deploy:
-  - git config user.email "build@travis-ci.org"
-  - git config user.name "Travis CI Build"
-  - rm Awesome.Trello/.gitignore
-  - git add . --all
-  - git commit --amend --reuse-message HEAD
+env:
+  global:
+  - GH_USER: lijunle
+  - GH_REPO: github.com/lijunle/awesome-trello.git
+
+script:
+  - npm install --production
+  - node Awesome.Trello.Pages/elm-build.js
 
 deploy:
-  provider: azure_web_apps
+  provider: script
+  skip_cleanup: true
+  script: node Awesome.Trello.Pages/elm-deploy.js
   on: master

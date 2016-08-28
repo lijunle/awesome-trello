@@ -257,5 +257,6 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 
-# temporary folder
-temp/
+# Build and deploy folder
+dist/
+deploy/
