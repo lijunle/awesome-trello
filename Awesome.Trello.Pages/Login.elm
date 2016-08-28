@@ -39,7 +39,7 @@ view model =
                 [ text "Hi, "
                 , text name
                 , text " "
-                , a [ href "/logout" ] [ text "Logout" ]
+                , a [ href "/" ] [ text "Logout" ]
                 ]
 
 
