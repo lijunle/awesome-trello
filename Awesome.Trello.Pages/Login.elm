@@ -39,7 +39,7 @@ view model =
                 [ text "Hi, "
                 , text name
                 , text " "
-                , a [ href "/" ] [ text "Logout" ]
+                , a [ href logoutUrl ] [ text "Logout" ]
                 ]
 
 
@@ -56,10 +56,19 @@ loginUrl =
             , ( "scope", "read,write,account" )
             , ( "name", Trello.appName )
             , ( "key", Trello.key )
-            , ( "redirect_uri", location.origin )
+            , ( "redirect_uri", location.href )
             ]
 
         authUrl =
             "https://trello.com/1/authorize"
     in
         Http.url authUrl query
+
+
+logoutUrl : String
+logoutUrl =
+    let
+        location =
+            WebAPI.Location.location
+    in
+        location.origin ++ location.pathname
