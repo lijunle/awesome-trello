@@ -257,5 +257,6 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 
-# Compile distination folder
+# Build and deploy folder
 dist/
+deploy/
