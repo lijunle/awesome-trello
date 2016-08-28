@@ -8,9 +8,8 @@ import Trello
 import WebAPI.Location
 
 
-type Model
-    = Login
-    | Logout Name
+type alias Model =
+    Maybe Name
 
 
 type Msg
@@ -20,12 +19,7 @@ type Msg
 
 init : Maybe Name -> Model
 init maybeName =
-    case maybeName of
-        Nothing ->
-            Login
-
-        Just name ->
-            Logout name
+    maybeName
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -37,10 +31,10 @@ update msg model =
 view : Model -> Html Msg
 view model =
     case model of
-        Login ->
+        Nothing ->
             a [ href loginUrl ] [ text "Login" ]
 
-        Logout name ->
+        Just name ->
             div []
                 [ text "Hi, "
                 , text name
