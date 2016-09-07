@@ -12,26 +12,11 @@ Clone this repo:
 git clone https://github.com/lijunle/awesome-trello.git
 ```
 
-Install the dependencies:
-
-```sh
-cd awesome-trello
-npm install
-dotnet restore
-```
-
-Easy development in watch mode. Open two terminals. One for:
-
-```sh
-cd Awesome.Trello.Pages
-node elm-watch.js
-```
-
-Another one for:
+Easy development commands:
 
 ```sh
 cd Awesome.Trello
-dotnet watch run
+node elm-watch.js
 ```
 
 ## Deployment

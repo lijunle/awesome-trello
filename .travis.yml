@@ -12,10 +12,10 @@ env:
 
 script:
   - npm install --production
-  - node Awesome.Trello.Pages/elm-build.js
+  - node Awesome.Trello/elm-build.js
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: node Awesome.Trello.Pages/elm-deploy.js
+  script: node Awesome.Trello/elm-deploy.js
   on: master
