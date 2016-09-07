@@ -1,5 +1,6 @@
 var path = require('path');
 var watch = require('watch');
+var browserSync = require("browser-sync").create();
 var run = require('../build/run');
 var patch = require('../build/patch');
 
@@ -47,6 +48,11 @@ watch.watchTree(
       console.log('Start monitor the directory ' + __dirname);
       Object.keys(file).forEach(function finish(filename) {
         console.log('- ' + filename);
+      });
+
+      browserSync.init({
+        server: '.',
+        files: ['dist/index.js']
       });
     } else if (prev === null) {
       // File is new

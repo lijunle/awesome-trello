@@ -6,6 +6,7 @@
     "uglify-js": "^2.7.0"
   },
   "devDependencies": {
+    "browser-sync": "^2.15.0",
     "watch": "^0.19.1"
   }
 }
