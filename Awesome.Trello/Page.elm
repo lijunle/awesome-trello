@@ -8,11 +8,13 @@ import Login
 import Model exposing (..)
 import Request
 import Task
+import Webhook
 
 
 type alias PageModel =
     { login : Login.Model
     , boards : Board.Model
+    , webhooks : Webhook.Model
     }
 
 
@@ -34,6 +36,7 @@ type Msg
     | GetToken (Maybe String)
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
+    | WebhookMsg Webhook.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,10 +53,22 @@ update msg model =
                 ( boardModel, boardMsg ) =
                     Board.init token member
 
+                ( webhookModel, webhookMsg ) =
+                    Webhook.init token
+
                 pageModel =
-                    { login = loginModel, boards = boardModel }
+                    { login = loginModel
+                    , boards = boardModel
+                    , webhooks = webhookModel
+                    }
+
+                cmd =
+                    [ Cmd.map BoardMsg boardMsg
+                    , Cmd.map WebhookMsg webhookMsg
+                    ]
+                        |> Cmd.batch
             in
-                ( Page pageModel, Cmd.map BoardMsg boardMsg )
+                ( Page pageModel, cmd )
 
         GetToken token ->
             case token of
@@ -93,6 +108,21 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        WebhookMsg msg ->
+            case model of
+                Page pageModel ->
+                    let
+                        ( webhookModel, webhookMsg ) =
+                            Webhook.update msg pageModel.webhooks
+
+                        newModel =
+                            { pageModel | webhooks = webhookModel }
+                    in
+                        ( Page newModel, Cmd.map WebhookMsg webhookMsg )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -113,6 +143,7 @@ view model =
             div []
                 [ (viewLogin pageModel.login)
                 , Board.view pageModel.boards |> Html.App.map BoardMsg
+                , Webhook.view pageModel.webhooks |> Html.App.map WebhookMsg
                 ]
 
 
