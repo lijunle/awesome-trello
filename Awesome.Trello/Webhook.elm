@@ -3,6 +3,8 @@ module Webhook exposing (Model, Msg, init, update, view)
 import Html exposing (..)
 import Http
 import Model exposing (..)
+import Request
+import Task
 
 
 type alias Model =
@@ -23,8 +25,12 @@ init token =
             { token = token
             , webhooks = []
             }
+
+        cmd =
+            Request.getWebhooks token
+                |> Task.perform FetchFail FetchSucceed
     in
-        ( model, Cmd.none )
+        ( model, cmd )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,4 +62,7 @@ view model =
 
 viewWebhook : Webhook -> Html Msg
 viewWebhook webhook =
-    text webhook.description
+    li []
+        [ div [] [ text webhook.description ]
+        , a [] [ text webhook.callbackURL ]
+        ]

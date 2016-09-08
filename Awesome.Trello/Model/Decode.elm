@@ -2,6 +2,7 @@ module Model.Decode exposing (..)
 
 import Model exposing (..)
 import Json.Decode
+import Json.Decode exposing ((:=))
 
 
 id : Json.Decode.Decoder String
@@ -37,6 +38,17 @@ boards =
 card : Json.Decode.Decoder Card
 card =
     Json.Decode.object3 Card id name idMembers
+
+
+webhook : Json.Decode.Decoder Webhook
+webhook =
+    Json.Decode.object5
+        Webhook
+        ("id" := Json.Decode.string)
+        ("active" := Json.Decode.bool)
+        ("idModel" := Json.Decode.string)
+        ("description" := Json.Decode.string)
+        ("callbackURL" := Json.Decode.string)
 
 
 member : Json.Decode.Decoder Member
