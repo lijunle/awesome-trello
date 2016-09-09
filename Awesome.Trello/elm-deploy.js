@@ -2,6 +2,8 @@ var path = require('path');
 var run = require('../build/run');
 var copy = require('../build/copy');
 
+copy(__dirname, '../LICENSE', './deploy/LICENSE');
+copy(__dirname, '../README.md', './deploy/README.md');
 copy(__dirname, './index.html', './deploy/index.html');
 copy(__dirname, './favicon.ico', './deploy/favicon.ico');
 copy(__dirname, './dist/index.js', './deploy/dist/index.js');
