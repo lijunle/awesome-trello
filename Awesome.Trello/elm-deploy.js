@@ -3,6 +3,7 @@ var run = require('../build/run');
 var copy = require('../build/copy');
 
 copy(__dirname, './index.html', './deploy/index.html');
+copy(__dirname, './favicon.ico', './deploy/favicon.ico');
 copy(__dirname, './dist/index.js', './deploy/dist/index.js');
 
 var deployFolder = path.resolve(__dirname, './deploy');
