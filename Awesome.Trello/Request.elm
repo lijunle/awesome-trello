@@ -127,3 +127,21 @@ setCardMember token member card =
                 |> Json.Encode.object
     in
         put url cardDecoder body
+
+
+getWebhooks : String -> Task.Task Http.Error (List Webhook)
+getWebhooks token =
+    let
+        baseUrl =
+            "/tokens/" ++ token ++ "/webhooks" |> toBaseUrl
+
+        query =
+            [] |> patchToken token
+
+        url =
+            Http.url baseUrl query
+
+        webhooksDecoder =
+            Model.Decode.webhook |> Json.Decode.list
+    in
+        Http.get webhooksDecoder url

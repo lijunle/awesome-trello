@@ -28,6 +28,15 @@ type alias Card =
     }
 
 
+type alias Webhook =
+    { id : Id
+    , active : Bool
+    , idModel : String
+    , description : String
+    , callbackURL : String
+    }
+
+
 type alias Member =
     { id : Id
     , fullName : Name

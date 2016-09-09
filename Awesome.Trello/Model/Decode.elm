@@ -1,49 +1,46 @@
 module Model.Decode exposing (..)
 
 import Model exposing (..)
-import Json.Decode
+import Json.Decode exposing (..)
 
 
-id : Json.Decode.Decoder String
-id =
-    Json.Decode.at [ "id" ] Json.Decode.string
+defaultTo : v -> Decoder v -> Decoder v
+defaultTo value decoder =
+    decoder |> maybe |> map (Maybe.withDefault value)
 
 
-name : Json.Decode.Decoder String
-name =
-    Json.Decode.at [ "name" ] Json.Decode.string
-
-
-fullName : Json.Decode.Decoder String
-fullName =
-    Json.Decode.at [ "fullName" ] Json.Decode.string
-
-
-idMembers : Json.Decode.Decoder (List String)
-idMembers =
-    Json.Decode.at [ "idMembers" ] (Json.Decode.list Json.Decode.string)
-
-
-board : Json.Decode.Decoder Board
+board : Decoder Board
 board =
-    Json.Decode.object2 Board id name
+    object2
+        Board
+        ("id" := string)
+        ("name" := string)
 
 
-boards : Json.Decode.Decoder (List Board)
-boards =
-    Json.Decode.at [ "boards" ] (Json.Decode.list board)
-
-
-card : Json.Decode.Decoder Card
+card : Decoder Card
 card =
-    Json.Decode.object3 Card id name idMembers
+    object3
+        Card
+        ("id" := string)
+        ("name" := string)
+        ("idMembers" := list string)
 
 
-member : Json.Decode.Decoder Member
+webhook : Decoder Webhook
+webhook =
+    object5
+        Webhook
+        ("id" := string)
+        ("active" := bool)
+        ("idModel" := string)
+        ("description" := string)
+        ("callbackURL" := string)
+
+
+member : Decoder Member
 member =
-    let
-        boardsWithDefault =
-            Json.Decode.maybe boards
-                |> Json.Decode.map (Maybe.withDefault [])
-    in
-        Json.Decode.object3 Member id fullName boardsWithDefault
+    object3
+        Member
+        ("id" := string)
+        ("fullName" := string)
+        ("boards" := list board |> defaultTo [])
