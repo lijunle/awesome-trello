@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/lijunle/awesome-trello.svg?branch=master)](https://travis-ci.org/lijunle/awesome-trello)
 
-Some awesome Trello utilities.
+Awesome Trello utilities: [lijunle.github.io/awesome-trello](https://lijunle.github.io/awesome-trello/)
 
 ## Development
 
