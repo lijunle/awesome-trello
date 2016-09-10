@@ -14,6 +14,11 @@ boardId =
     map BoardId string
 
 
+cardId : Decoder CardId
+cardId =
+    map CardId string
+
+
 id : Decoder Id
 id =
     map Id string
@@ -36,7 +41,7 @@ card : Decoder Card
 card =
     object3
         Card
-        ("id" := id)
+        ("id" := cardId)
         ("name" := name)
         ("idMembers" := list string)
 

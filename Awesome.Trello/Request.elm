@@ -117,7 +117,7 @@ setCardMember : String -> Member -> Card -> Task.Task Http.Error Card
 setCardMember token member card =
     let
         cardId =
-            card.id |> toIdString
+            card.id |> toCardIdString
 
         baseUrl =
             "cards/" ++ cardId ++ "/idMembers" |> toBaseUrl

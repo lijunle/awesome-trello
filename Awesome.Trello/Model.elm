@@ -14,6 +14,17 @@ toBoardIdString boardId =
             boardId
 
 
+type CardId
+    = CardId String
+
+
+toCardIdString : CardId -> String
+toCardIdString cardId =
+    case cardId of
+        CardId cardId ->
+            cardId
+
+
 type Id
     = Id String
 
@@ -54,7 +65,7 @@ type alias Board =
 
 
 type alias Card =
-    { id : Id
+    { id : CardId
     , name : Name
     , idMembers : List String
     }
