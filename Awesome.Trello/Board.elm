@@ -101,7 +101,7 @@ update msg model =
             let
                 member =
                     model.members
-                        |> List.filter (\x -> x.id == Id memberId)
+                        |> List.filter (\x -> x.id == MemberId memberId)
                         |> List.head
 
                 newModel =
@@ -157,7 +157,7 @@ viewMemberSelector members =
             |> List.map
                 (\x ->
                     option
-                        [ value (toIdString x.id) ]
+                        [ value (toMemberIdString x.id) ]
                         [ text (toNameString x.fullName) ]
                 )
         )

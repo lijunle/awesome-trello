@@ -25,6 +25,17 @@ toCardIdString cardId =
             cardId
 
 
+type MemberId
+    = MemberId String
+
+
+toMemberIdString : MemberId -> String
+toMemberIdString memberId =
+    case memberId of
+        MemberId memberId ->
+            memberId
+
+
 type Id
     = Id String
 
@@ -81,7 +92,7 @@ type alias Webhook =
 
 
 type alias Member =
-    { id : Id
+    { id : MemberId
     , fullName : Name
     , boards : List Board
     }

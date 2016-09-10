@@ -19,6 +19,11 @@ cardId =
     map CardId string
 
 
+memberId : Decoder MemberId
+memberId =
+    map MemberId string
+
+
 id : Decoder Id
 id =
     map Id string
@@ -61,6 +66,6 @@ member : Decoder Member
 member =
     object3
         Member
-        ("id" := id)
+        ("id" := memberId)
         ("fullName" := name)
         ("boards" := list board |> defaultTo [])

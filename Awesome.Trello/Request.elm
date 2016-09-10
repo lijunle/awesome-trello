@@ -132,7 +132,7 @@ setCardMember token member card =
             Model.Decode.card
 
         body =
-            [ ( "value", member.id |> toIdString |> Json.Encode.string ) ]
+            [ ( "value", member.id |> toMemberIdString |> Json.Encode.string ) ]
                 |> Json.Encode.object
     in
         put url cardDecoder body
