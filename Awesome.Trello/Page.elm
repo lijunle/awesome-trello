@@ -7,7 +7,9 @@ import Http
 import Login
 import Model exposing (..)
 import Request
+import String
 import Task
+import WebAPI.Location
 import Webhook
 
 
@@ -27,7 +29,13 @@ type Model
 
 init : ( Model, Cmd Msg )
 init =
-    ( Init, Cmd.none )
+    let
+        cmd =
+            WebAPI.Location.location
+                |> Task.map getToken
+                |> Task.perform FetchFail GetToken
+    in
+        ( Init, cmd )
 
 
 type Msg
@@ -174,3 +182,21 @@ getMemberMe token =
     Request.getMemberMe token
         |> Task.map (\member -> ( token, member ))
         |> Task.perform FetchFail FetchSucceed
+
+
+getToken : WebAPI.Location.Location -> Maybe String
+getToken location =
+    let
+        hashtag =
+            location.hash
+
+        tokenPrefix =
+            "#token="
+
+        tokenPrefixLength =
+            String.length tokenPrefix
+    in
+        if hashtag |> String.startsWith tokenPrefix then
+            Just (hashtag |> String.dropLeft tokenPrefixLength)
+        else
+            Nothing
