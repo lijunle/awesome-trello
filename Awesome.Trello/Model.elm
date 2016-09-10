@@ -36,15 +36,15 @@ toMemberIdString memberId =
             memberId
 
 
-type Id
-    = Id String
+type WebhookId
+    = WebhookId String
 
 
-toIdString : Id -> String
-toIdString id =
-    case id of
-        Id id ->
-            id
+toWebhookIdString : WebhookId -> String
+toWebhookIdString webhookId =
+    case webhookId of
+        WebhookId webhookId ->
+            webhookId
 
 
 type Name
@@ -83,7 +83,7 @@ type alias Card =
 
 
 type alias Webhook =
-    { id : Id
+    { id : WebhookId
     , active : Bool
     , idModel : String
     , description : String

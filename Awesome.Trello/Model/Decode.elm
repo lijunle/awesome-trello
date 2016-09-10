@@ -24,9 +24,9 @@ memberId =
     map MemberId string
 
 
-id : Decoder Id
-id =
-    map Id string
+webhookId : Decoder WebhookId
+webhookId =
+    map WebhookId string
 
 
 name : Decoder Name
@@ -55,7 +55,7 @@ webhook : Decoder Webhook
 webhook =
     object5
         Webhook
-        ("id" := id)
+        ("id" := webhookId)
         ("active" := bool)
         ("idModel" := string)
         ("description" := string)
