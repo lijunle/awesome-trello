@@ -30,7 +30,7 @@ init : Maybe Name -> ( Model, Cmd Msg )
 init maybeName =
     let
         urls =
-            { login = "", logout = "" }
+            { login = Url "", logout = Url "" }
 
         model =
             { name = maybeName, urls = urls }
@@ -61,11 +61,11 @@ view model =
                 [ text "Hi, "
                 , text name
                 , text " "
-                , a [ href model.urls.logout ] [ text "Logout" ]
+                , a [ href (toUrlString model.urls.logout) ] [ text "Logout" ]
                 ]
 
         Nothing ->
-            a [ href model.urls.login ] [ text "Login" ]
+            a [ href (toUrlString model.urls.login) ] [ text "Login" ]
 
 
 getUrls : WebAPI.Location.Location -> Urls
@@ -90,4 +90,4 @@ getUrls location =
         logoutUrl =
             location.origin ++ location.pathname
     in
-        { login = loginUrl, logout = logoutUrl }
+        { login = Url loginUrl, logout = Url logoutUrl }

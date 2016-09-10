@@ -11,8 +11,15 @@ type alias Name =
     String
 
 
-type alias Url =
-    String
+type Url
+    = Url String
+
+
+toUrlString : Url -> String
+toUrlString url =
+    case url of
+        Url url ->
+            url
 
 
 type alias Board =
