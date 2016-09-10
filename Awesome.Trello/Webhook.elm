@@ -8,7 +8,7 @@ import Task
 
 
 type alias Model =
-    { token : String
+    { token : Token
     , webhooks : List Webhook
     }
 
@@ -18,7 +18,7 @@ type Msg
     | FetchSucceed (List Webhook)
 
 
-init : String -> ( Model, Cmd Msg )
+init : Token -> ( Model, Cmd Msg )
 init token =
     let
         model =

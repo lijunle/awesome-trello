@@ -10,7 +10,7 @@ import Task
 
 
 type alias Model =
-    { token : String
+    { token : Token
     , boards : List Board
     , members : List Member
     , cards : List Card
@@ -28,7 +28,7 @@ type Msg
     | Submit
 
 
-init : String -> Member -> ( Model, Cmd Msg )
+init : Token -> Member -> ( Model, Cmd Msg )
 init token member =
     let
         model =
@@ -84,7 +84,7 @@ update msg model =
             let
                 board =
                     model.boards
-                        |> List.filter (\x -> x.id == boardId)
+                        |> List.filter (\x -> x.id == BoardId boardId)
                         |> List.head
 
                 newModel =
@@ -101,7 +101,7 @@ update msg model =
             let
                 member =
                     model.members
-                        |> List.filter (\x -> x.id == memberId)
+                        |> List.filter (\x -> x.id == MemberId memberId)
                         |> List.head
 
                 newModel =
@@ -140,13 +140,27 @@ view model =
 viewBoardSelector : List Board -> Html Msg
 viewBoardSelector boards =
     select [ onInput SelectBoard ]
-        (boards |> List.map (\x -> option [ value x.id ] [ text x.name ]))
+        (boards
+            |> List.map
+                (\x ->
+                    option
+                        [ value (toBoardIdString x.id) ]
+                        [ text (toNameString x.name) ]
+                )
+        )
 
 
 viewMemberSelector : List Member -> Html Msg
 viewMemberSelector members =
     select [ onInput SelectMember ]
-        (members |> List.map (\x -> option [ value x.id ] [ text x.fullName ]))
+        (members
+            |> List.map
+                (\x ->
+                    option
+                        [ value (toMemberIdString x.id) ]
+                        [ text (toNameString x.fullName) ]
+                )
+        )
 
 
 viewCardList : List Card -> Html Msg
@@ -156,7 +170,13 @@ viewCardList cards =
             [ text "Affecting cards" ]
         , ul
             []
-            (cards |> List.map (\x -> li [] [ text x.name ]))
+            (cards
+                |> List.map
+                    (\x ->
+                        li []
+                            [ text (toNameString x.name) ]
+                    )
+            )
         ]
 
 
@@ -166,7 +186,7 @@ viewSubmitButton =
         [ text "Submit" ]
 
 
-toModel : String -> Member -> Model
+toModel : Token -> Member -> Model
 toModel token member =
     Model
         token
@@ -177,19 +197,19 @@ toModel token member =
         Nothing
 
 
-getCard : String -> Board -> Cmd Msg
+getCard : Token -> Board -> Cmd Msg
 getCard token board =
     Request.getBoardCards token board
         |> Task.perform FetchFail FetchCardSucceed
 
 
-getBoardMembers : String -> Board -> Cmd Msg
+getBoardMembers : Token -> Board -> Cmd Msg
 getBoardMembers token board =
     Request.getBoardMembers token board
         |> Task.perform FetchFail FetchMemberSucceed
 
 
-setCardsMember : String -> Member -> List Card -> Cmd Msg
+setCardsMember : Token -> Member -> List Card -> Cmd Msg
 setCardsMember token member cards =
     {- TODO run tasks simultanously -}
     cards

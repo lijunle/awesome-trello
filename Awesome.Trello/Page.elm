@@ -50,8 +50,8 @@ init =
 
 type Msg
     = FetchFail Http.Error
-    | FetchSucceed ( String, Member )
-    | GetToken (Maybe String)
+    | FetchSucceed ( Token, Member )
+    | GetToken (Maybe Token)
     | LoginMsg Login.Msg
     | BoardMsg Board.Msg
     | WebhookMsg Webhook.Msg
@@ -183,14 +183,14 @@ subscriptions model =
     Sub.none
 
 
-getMemberMe : String -> Cmd Msg
+getMemberMe : Token -> Cmd Msg
 getMemberMe token =
     Request.getMemberMe token
         |> Task.map (\member -> ( token, member ))
         |> Task.perform FetchFail FetchSucceed
 
 
-getToken : WebAPI.Location.Location -> Maybe String
+getToken : WebAPI.Location.Location -> Maybe Token
 getToken location =
     let
         hashtag =
@@ -203,6 +203,6 @@ getToken location =
             String.length tokenPrefix
     in
         if hashtag |> String.startsWith tokenPrefix then
-            Just (hashtag |> String.dropLeft tokenPrefixLength)
+            Just (hashtag |> String.dropLeft tokenPrefixLength |> Token)
         else
             Nothing
