@@ -4,51 +4,73 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Model exposing (..)
+import Task
 import Trello
 import WebAPI.Location
 
 
+type alias Urls =
+    { login : Url
+    , logout : Url
+    }
+
+
 type alias Model =
-    Maybe Name
+    { name : Maybe Name
+    , urls : Urls
+    }
 
 
 type Msg
-    = LoginMsg
-    | LogoutMsg
+    = Error String
+    | GetUrls Urls
 
 
-init : Maybe Name -> Model
+init : Maybe Name -> ( Model, Cmd Msg )
 init maybeName =
-    maybeName
+    let
+        urls =
+            { login = "", logout = "" }
+
+        model =
+            { name = maybeName, urls = urls }
+
+        cmd =
+            WebAPI.Location.location
+                |> Task.map getUrls
+                |> Task.perform Error GetUrls
+    in
+        ( model, cmd )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    {- TODO AJAX login/logout -}
-    ( model, Cmd.none )
+    case msg of
+        Error _ ->
+            ( model, Cmd.none )
+
+        GetUrls urls ->
+            ( { model | urls = urls }, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    case model of
-        Nothing ->
-            a [ href loginUrl ] [ text "Login" ]
-
+    case model.name of
         Just name ->
             div []
                 [ text "Hi, "
                 , text name
                 , text " "
-                , a [ href logoutUrl ] [ text "Logout" ]
+                , a [ href model.urls.logout ] [ text "Logout" ]
                 ]
 
+        Nothing ->
+            a [ href model.urls.login ] [ text "Login" ]
 
-loginUrl : String
-loginUrl =
+
+getUrls : WebAPI.Location.Location -> Urls
+getUrls location =
     let
-        location =
-            WebAPI.Location.location
-
         query =
             [ ( "expiration", "never" )
             , ( "response_type", "token" )
@@ -61,14 +83,11 @@ loginUrl =
 
         authUrl =
             "https://trello.com/1/authorize"
-    in
-        Http.url authUrl query
 
+        loginUrl =
+            Http.url authUrl query
 
-logoutUrl : String
-logoutUrl =
-    let
-        location =
-            WebAPI.Location.location
+        logoutUrl =
+            location.origin ++ location.pathname
     in
-        location.origin ++ location.pathname
+        { login = loginUrl, logout = logoutUrl }
