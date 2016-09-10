@@ -4,6 +4,9 @@ var browserSync = require("browser-sync").create();
 var run = require('../build/run');
 var patch = require('../build/patch');
 
+var nativeFolder = path.resolve(__dirname, 'Native');
+var excludeFolders = ['deploy', 'dist', 'elm-stuff'];
+
 function isPackage(file) {
   return path.basename(file) === 'elm-package.json';
 }
@@ -12,20 +15,27 @@ function isElm(file) {
   return path.extname(file) === '.elm';
 }
 
+function isFolder(folder, stats) {
+  return stats.isDirectory() && excludeFolders.indexOf(path.basename(folder)) === -1;
+}
+
+function isNative(file) {
+  return file.indexOf(nativeFolder) === 0;
+}
+
 function runWatch(file) {
   try {
     if (isPackage(file)) {
       run(__dirname, ['elm package install --yes']);
-    } else if (isElm(file)) {
+    } else {
       console.log('Change file ' + file);
       run(__dirname, 'elm make --warn Index.elm --output ./dist/index.js');
       patch(__dirname, './dist/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
       patch(__dirname, './dist/index.js', '{TRELLO_APP_NAME}', process.env.TRELLO_APP_NAME);
-    } else {
-      // No-op
     }
   } catch (e) {
     // Skip any error in watch mode.
+    console.log('Error happens.');
   }
 }
 
@@ -34,9 +44,14 @@ watch.watchTree(
   {
     ignoreNotPermitted: true,
     ignoreUnreadableDir: true,
-    ignoreDirectoryPattern: /(obj|bin)/,
-    filter: function filter(file) {
-      return isPackage(file) || isElm(file);
+    ignoreDirectoryPattern: /(dist|elm-stuff)/,
+    filter: function filter(file, stats) {
+      return (
+        isPackage(file, stats)
+        || isElm(file, stats)
+        || isFolder(file, stats)
+        || isNative(file, stats)
+      );
     }
   },
   function (file, curr, prev) {
