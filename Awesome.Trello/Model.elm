@@ -15,6 +15,10 @@ type alias Name =
     String
 
 
+type alias Url =
+    String
+
+
 type alias Board =
     { id : String
     , name : String

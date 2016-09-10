@@ -47,7 +47,7 @@ update msg model =
 
         FetchSucceed ( token, member ) ->
             let
-                loginModel =
+                ( loginModel, loginMsg ) =
                     Login.init (Just member.fullName)
 
                 ( boardModel, boardMsg ) =
@@ -63,7 +63,8 @@ update msg model =
                     }
 
                 cmd =
-                    [ Cmd.map BoardMsg boardMsg
+                    [ Cmd.map LoginMsg loginMsg
+                    , Cmd.map BoardMsg boardMsg
                     , Cmd.map WebhookMsg webhookMsg
                     ]
                         |> Cmd.batch
@@ -73,7 +74,11 @@ update msg model =
         GetToken token ->
             case token of
                 Nothing ->
-                    ( Login (Login.init Nothing), Cmd.none )
+                    let
+                        ( loginModel, loginMsg ) =
+                            Login.init Nothing
+                    in
+                        ( Login loginModel, Cmd.map LoginMsg loginMsg )
 
                 Just token ->
                     ( Init, getMemberMe token )
