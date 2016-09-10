@@ -95,6 +95,13 @@ update msg model =
                     in
                         ( Page newModel, Cmd.map LoginMsg loginMsg )
 
+                Login loginModel ->
+                    let
+                        ( newModel, loginMsg ) =
+                            Login.update msg loginModel
+                    in
+                        ( Login newModel, Cmd.map LoginMsg loginMsg )
+
                 _ ->
                     ( model, Cmd.none )
 
