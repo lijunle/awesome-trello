@@ -13,29 +13,39 @@ import WebAPI.Location
 import Webhook
 
 
-type alias PageModel =
-    { login : Login.Model
-    , boards : Board.Model
-    , webhooks : Webhook.Model
+type alias Model =
+    { error : Maybe Http.Error
+    , login : Login.Model
+    , boards : Maybe Board.Model
+    , webhooks : Maybe Webhook.Model
     }
-
-
-type Model
-    = Init
-    | Error Http.Error
-    | Login Login.Model
-    | Page PageModel
 
 
 init : ( Model, Cmd Msg )
 init =
     let
-        cmd =
+        ( loginModel, loginMsg ) =
+            Login.init Nothing
+
+        model =
+            { error = Nothing
+            , login = loginModel
+            , boards = Nothing
+            , webhooks = Nothing
+            }
+
+        getTokenCmd =
             WebAPI.Location.location
                 |> Task.map getToken
                 |> Task.perform FetchFail GetToken
+
+        loginCmd =
+            Cmd.map LoginMsg loginMsg
+
+        cmd =
+            Cmd.batch [ getTokenCmd, loginCmd ]
     in
-        ( Init, cmd )
+        ( model, cmd )
 
 
 type Msg
@@ -51,7 +61,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         FetchFail error ->
-            ( Error error, Cmd.none )
+            ( { model | error = Just error }, Cmd.none )
 
         FetchSucceed ( token, member ) ->
             let
@@ -64,10 +74,11 @@ update msg model =
                 ( webhookModel, webhookMsg ) =
                     Webhook.init token
 
-                pageModel =
-                    { login = loginModel
-                    , boards = boardModel
-                    , webhooks = webhookModel
+                newModel =
+                    { model
+                        | login = loginModel
+                        , boards = Just boardModel
+                        , webhooks = Just webhookModel
                     }
 
                 cmd =
@@ -77,99 +88,94 @@ update msg model =
                     ]
                         |> Cmd.batch
             in
-                ( Page pageModel, cmd )
+                ( newModel, cmd )
 
         GetToken token ->
             case token of
                 Nothing ->
-                    let
-                        ( loginModel, loginMsg ) =
-                            Login.init Nothing
-                    in
-                        ( Login loginModel, Cmd.map LoginMsg loginMsg )
+                    ( model, Cmd.none )
 
                 Just token ->
-                    ( Init, getMemberMe token )
+                    ( model, getMemberMe token )
 
-        LoginMsg msg ->
-            case model of
-                Page pageModel ->
-                    let
-                        ( loginModel, loginMsg ) =
-                            Login.update msg pageModel.login
+        LoginMsg loginMsg ->
+            model.login
+                |> updateLogin model loginMsg
 
-                        newModel =
-                            { pageModel | login = loginModel }
-                    in
-                        ( Page newModel, Cmd.map LoginMsg loginMsg )
+        BoardMsg boardMsg ->
+            model.boards
+                |>> (updateBoards model boardMsg)
+                ||> ( model, Cmd.none )
 
-                Login loginModel ->
-                    let
-                        ( newModel, loginMsg ) =
-                            Login.update msg loginModel
-                    in
-                        ( Login newModel, Cmd.map LoginMsg loginMsg )
+        WebhookMsg webhookMsg ->
+            model.webhooks
+                |>> (updateWebhooks model webhookMsg)
+                ||> ( model, Cmd.none )
 
-                _ ->
-                    ( model, Cmd.none )
 
-        BoardMsg msg ->
-            case model of
-                Page pageModel ->
-                    let
-                        ( boardModel, boardMsg ) =
-                            Board.update msg pageModel.boards
+updateLogin : Model -> Login.Msg -> Login.Model -> ( Model, Cmd Msg )
+updateLogin model loginMsg loginModel =
+    let
+        ( newModel, newMsg ) =
+            Login.update loginMsg loginModel
+    in
+        ( { model | login = newModel }
+        , Cmd.map LoginMsg newMsg
+        )
 
-                        newModel =
-                            { pageModel | boards = boardModel }
-                    in
-                        ( Page newModel, Cmd.map BoardMsg boardMsg )
 
-                _ ->
-                    ( model, Cmd.none )
+updateBoards : Model -> Board.Msg -> Board.Model -> ( Model, Cmd Msg )
+updateBoards model boardMsg boardModel =
+    let
+        ( newModel, newMsg ) =
+            Board.update boardMsg boardModel
+    in
+        ( { model | boards = Just newModel }
+        , Cmd.map BoardMsg newMsg
+        )
 
-        WebhookMsg msg ->
-            case model of
-                Page pageModel ->
-                    let
-                        ( webhookModel, webhookMsg ) =
-                            Webhook.update msg pageModel.webhooks
 
-                        newModel =
-                            { pageModel | webhooks = webhookModel }
-                    in
-                        ( Page newModel, Cmd.map WebhookMsg webhookMsg )
-
-                _ ->
-                    ( model, Cmd.none )
+updateWebhooks : Model -> Webhook.Msg -> Webhook.Model -> ( Model, Cmd Msg )
+updateWebhooks model webhookMsg webhookModel =
+    let
+        ( newModel, newMsg ) =
+            Webhook.update webhookMsg webhookModel
+    in
+        ( { model | webhooks = Just newModel }
+        , Cmd.map WebhookMsg newMsg
+        )
 
 
 view : Model -> Html Msg
 view model =
-    case model of
-        Init ->
-            div [] [ text "Loading..." ]
-
-        Error error ->
+    case model.error of
+        Just error ->
             div []
                 [ text "Error happens: "
                 , text (toString error)
                 ]
 
-        Login loginModel ->
-            viewLogin loginModel
-
-        Page pageModel ->
+        _ ->
             div []
-                [ (viewLogin pageModel.login)
-                , Board.view pageModel.boards |> Html.App.map BoardMsg
-                , Webhook.view pageModel.webhooks |> Html.App.map WebhookMsg
+                [ model.login |> Login.view |> Html.App.map LoginMsg
+                , model.boards |>> (Board.view >> Html.App.map BoardMsg) ||> nothing
+                , model.webhooks |>> (Webhook.view >> Html.App.map WebhookMsg) ||> nothing
                 ]
 
 
-viewLogin : Login.Model -> Html Msg
-viewLogin loginModel =
-    Login.view loginModel |> Html.App.map LoginMsg
+(|>>) : Maybe a -> (a -> b) -> Maybe b
+(|>>) maybe f =
+    maybe |> Maybe.map f
+
+
+(||>) : Maybe a -> a -> a
+(||>) maybe value =
+    maybe |> Maybe.withDefault value
+
+
+nothing : Html msg
+nothing =
+    text ""
 
 
 subscriptions : Model -> Sub Msg
