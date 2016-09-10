@@ -101,7 +101,7 @@ update msg model =
             let
                 member =
                     model.members
-                        |> List.filter (\x -> x.id == memberId)
+                        |> List.filter (\x -> x.id == Id memberId)
                         |> List.head
 
                 newModel =
@@ -146,7 +146,7 @@ viewBoardSelector boards =
 viewMemberSelector : List Member -> Html Msg
 viewMemberSelector members =
     select [ onInput SelectMember ]
-        (members |> List.map (\x -> option [ value x.id ] [ text x.fullName ]))
+        (members |> List.map (\x -> option [ value (toIdString x.id) ] [ text x.fullName ]))
 
 
 viewCardList : List Card -> Html Msg

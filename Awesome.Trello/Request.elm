@@ -110,8 +110,11 @@ getBoardMembers token board =
 setCardMember : String -> Member -> Card -> Task.Task Http.Error Card
 setCardMember token member card =
     let
+        cardId =
+            card.id |> toIdString
+
         baseUrl =
-            "cards/" ++ card.id ++ "/idMembers" |> toBaseUrl
+            "cards/" ++ cardId ++ "/idMembers" |> toBaseUrl
 
         query =
             [] |> patchToken token
@@ -123,7 +126,7 @@ setCardMember token member card =
             Model.Decode.card
 
         body =
-            [ ( "value", Json.Encode.string member.id ) ]
+            [ ( "value", member.id |> toIdString |> Json.Encode.string ) ]
                 |> Json.Encode.object
     in
         put url cardDecoder body

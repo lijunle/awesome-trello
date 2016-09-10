@@ -3,8 +3,15 @@ module Model exposing (..)
 {- TODO add strong type Id, Name and Token -}
 
 
-type alias Id =
-    String
+type Id
+    = Id String
+
+
+toIdString : Id -> String
+toIdString id =
+    case id of
+        Id id ->
+            id
 
 
 type alias Name =
