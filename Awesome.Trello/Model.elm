@@ -78,14 +78,14 @@ type alias Board =
 type alias Card =
     { id : CardId
     , name : Name
-    , idMembers : List String
+    , idMembers : List MemberId
     }
 
 
 type alias Webhook =
     { id : WebhookId
     , active : Bool
-    , idModel : String
+    , idModel : BoardId {- We only care about board ID now -}
     , description : String
     , callbackURL : String
     }

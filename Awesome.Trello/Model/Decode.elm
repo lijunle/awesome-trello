@@ -48,7 +48,7 @@ card =
         Card
         ("id" := cardId)
         ("name" := name)
-        ("idMembers" := list string)
+        ("idMembers" := list memberId)
 
 
 webhook : Decoder Webhook
@@ -57,7 +57,7 @@ webhook =
         Webhook
         ("id" := webhookId)
         ("active" := bool)
-        ("idModel" := string)
+        ("idModel" := boardId)
         ("description" := string)
         ("callbackURL" := string)
 
