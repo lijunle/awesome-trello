@@ -3,10 +3,6 @@ module Model exposing (..)
 {- TODO add strong type Id, Name and Token -}
 
 
-type alias IncomingPort data msg =
-    (data -> msg) -> Sub msg
-
-
 type alias Id =
     String
 

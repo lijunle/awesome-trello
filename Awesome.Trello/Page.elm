@@ -164,9 +164,9 @@ viewLogin loginModel =
     Login.view loginModel |> Html.App.map LoginMsg
 
 
-subscriptions : IncomingPort (Maybe String) Msg -> Sub Msg
-subscriptions tokenIncomingPort =
-    tokenIncomingPort GetToken
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 getMemberMe : String -> Cmd Msg
