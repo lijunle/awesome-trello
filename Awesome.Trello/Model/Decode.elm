@@ -9,6 +9,11 @@ defaultTo value decoder =
     decoder |> maybe |> map (Maybe.withDefault value)
 
 
+boardId : Decoder BoardId
+boardId =
+    map BoardId string
+
+
 id : Decoder Id
 id =
     map Id string
@@ -23,8 +28,8 @@ board : Decoder Board
 board =
     object2
         Board
-        ("id" := string)
-        ("name" := string)
+        ("id" := boardId)
+        ("name" := name)
 
 
 card : Decoder Card

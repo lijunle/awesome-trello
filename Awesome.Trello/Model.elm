@@ -3,6 +3,17 @@ module Model exposing (..)
 {- TODO add strong type Id, Name and Token -}
 
 
+type BoardId
+    = BoardId String
+
+
+toBoardIdString : BoardId -> String
+toBoardIdString boardId =
+    case boardId of
+        BoardId boardId ->
+            boardId
+
+
 type Id
     = Id String
 
@@ -37,8 +48,8 @@ toUrlString url =
 
 
 type alias Board =
-    { id : String
-    , name : String
+    { id : BoardId
+    , name : Name
     }
 
 

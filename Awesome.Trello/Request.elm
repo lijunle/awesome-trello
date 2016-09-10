@@ -68,8 +68,11 @@ getMemberMe token =
 getBoardCards : String -> Board -> Task.Task Http.Error (List Card)
 getBoardCards token board =
     let
+        boardId =
+            board.id |> toBoardIdString
+
         baseUrl =
-            "boards/" ++ board.id ++ "/cards" |> toBaseUrl
+            "boards/" ++ boardId ++ "/cards" |> toBaseUrl
 
         query =
             [ ( "filter", "open" )
@@ -89,8 +92,11 @@ getBoardCards token board =
 getBoardMembers : String -> Board -> Task.Task Http.Error (List Member)
 getBoardMembers token board =
     let
+        boardId =
+            board.id |> toBoardIdString
+
         baseUrl =
-            "boards/" ++ board.id ++ "/members" |> toBaseUrl
+            "boards/" ++ boardId ++ "/members" |> toBaseUrl
 
         query =
             [ ( "filter", "all" )

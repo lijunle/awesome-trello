@@ -84,7 +84,7 @@ update msg model =
             let
                 board =
                     model.boards
-                        |> List.filter (\x -> x.id == boardId)
+                        |> List.filter (\x -> x.id == BoardId boardId)
                         |> List.head
 
                 newModel =
@@ -140,7 +140,14 @@ view model =
 viewBoardSelector : List Board -> Html Msg
 viewBoardSelector boards =
     select [ onInput SelectBoard ]
-        (boards |> List.map (\x -> option [ value x.id ] [ text x.name ]))
+        (boards
+            |> List.map
+                (\x ->
+                    option
+                        [ value (toBoardIdString x.id) ]
+                        [ text (toNameString x.name) ]
+                )
+        )
 
 
 viewMemberSelector : List Member -> Html Msg
