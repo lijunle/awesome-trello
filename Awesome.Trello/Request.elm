@@ -28,12 +28,12 @@ put url decoder payload =
             |> Http.fromJson decoder
 
 
-patchToken : String -> List ( String, String ) -> List ( String, String )
+patchToken : Token -> List ( String, String ) -> List ( String, String )
 patchToken token query =
     let
         common =
             [ ( "key", Trello.key )
-            , ( "token", token )
+            , ( "token", token |> toTokenString )
             ]
     in
         List.concat [ common, query ]
@@ -44,7 +44,7 @@ toBaseUrl endPoint =
     "https://api.trello.com/1/" ++ endPoint
 
 
-getMemberMe : String -> Task.Task Http.Error Member
+getMemberMe : Token -> Task.Task Http.Error Member
 getMemberMe token =
     let
         baseUrl =
@@ -65,7 +65,7 @@ getMemberMe token =
         Http.get member url
 
 
-getBoardCards : String -> Board -> Task.Task Http.Error (List Card)
+getBoardCards : Token -> Board -> Task.Task Http.Error (List Card)
 getBoardCards token board =
     let
         boardId =
@@ -89,7 +89,7 @@ getBoardCards token board =
         Http.get cardList url
 
 
-getBoardMembers : String -> Board -> Task.Task Http.Error (List Member)
+getBoardMembers : Token -> Board -> Task.Task Http.Error (List Member)
 getBoardMembers token board =
     let
         boardId =
@@ -113,7 +113,7 @@ getBoardMembers token board =
         Http.get memberList url
 
 
-setCardMember : String -> Member -> Card -> Task.Task Http.Error Card
+setCardMember : Token -> Member -> Card -> Task.Task Http.Error Card
 setCardMember token member card =
     let
         cardId =
@@ -138,11 +138,14 @@ setCardMember token member card =
         put url cardDecoder body
 
 
-getWebhooks : String -> Task.Task Http.Error (List Webhook)
+getWebhooks : Token -> Task.Task Http.Error (List Webhook)
 getWebhooks token =
     let
+        tokenString =
+            token |> toTokenString
+
         baseUrl =
-            "/tokens/" ++ token ++ "/webhooks" |> toBaseUrl
+            "/tokens/" ++ tokenString ++ "/webhooks" |> toBaseUrl
 
         query =
             [] |> patchToken token

@@ -58,6 +58,17 @@ toNameString name =
             name
 
 
+type Token
+    = Token String
+
+
+toTokenString : Token -> String
+toTokenString token =
+    case token of
+        Token token ->
+            token
+
+
 type Url
     = Url String
 

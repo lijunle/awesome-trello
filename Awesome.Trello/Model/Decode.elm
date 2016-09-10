@@ -34,6 +34,11 @@ name =
     map Name string
 
 
+token : Decoder Token
+token =
+    map Token string
+
+
 board : Decoder Board
 board =
     object2

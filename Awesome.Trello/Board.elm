@@ -10,7 +10,7 @@ import Task
 
 
 type alias Model =
-    { token : String
+    { token : Token
     , boards : List Board
     , members : List Member
     , cards : List Card
@@ -28,7 +28,7 @@ type Msg
     | Submit
 
 
-init : String -> Member -> ( Model, Cmd Msg )
+init : Token -> Member -> ( Model, Cmd Msg )
 init token member =
     let
         model =
@@ -186,7 +186,7 @@ viewSubmitButton =
         [ text "Submit" ]
 
 
-toModel : String -> Member -> Model
+toModel : Token -> Member -> Model
 toModel token member =
     Model
         token
@@ -197,19 +197,19 @@ toModel token member =
         Nothing
 
 
-getCard : String -> Board -> Cmd Msg
+getCard : Token -> Board -> Cmd Msg
 getCard token board =
     Request.getBoardCards token board
         |> Task.perform FetchFail FetchCardSucceed
 
 
-getBoardMembers : String -> Board -> Cmd Msg
+getBoardMembers : Token -> Board -> Cmd Msg
 getBoardMembers token board =
     Request.getBoardMembers token board
         |> Task.perform FetchFail FetchMemberSucceed
 
 
-setCardsMember : String -> Member -> List Card -> Cmd Msg
+setCardsMember : Token -> Member -> List Card -> Cmd Msg
 setCardsMember token member cards =
     {- TODO run tasks simultanously -}
     cards
