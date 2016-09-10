@@ -14,8 +14,15 @@ toIdString id =
             id
 
 
-type alias Name =
-    String
+type Name
+    = Name String
+
+
+toNameString : Name -> String
+toNameString name =
+    case name of
+        Name name ->
+            name
 
 
 type Url

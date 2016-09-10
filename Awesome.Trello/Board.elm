@@ -146,7 +146,14 @@ viewBoardSelector boards =
 viewMemberSelector : List Member -> Html Msg
 viewMemberSelector members =
     select [ onInput SelectMember ]
-        (members |> List.map (\x -> option [ value (toIdString x.id) ] [ text x.fullName ]))
+        (members
+            |> List.map
+                (\x ->
+                    option
+                        [ value (toIdString x.id) ]
+                        [ text (toNameString x.fullName) ]
+                )
+        )
 
 
 viewCardList : List Card -> Html Msg
@@ -156,7 +163,13 @@ viewCardList cards =
             [ text "Affecting cards" ]
         , ul
             []
-            (cards |> List.map (\x -> li [] [ text x.name ]))
+            (cards
+                |> List.map
+                    (\x ->
+                        li []
+                            [ text (toNameString x.name) ]
+                    )
+            )
         ]
 
 

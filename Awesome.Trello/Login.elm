@@ -59,7 +59,7 @@ view model =
         Just name ->
             div []
                 [ text "Hi, "
-                , text name
+                , text (toNameString name)
                 , text " "
                 , a [ href (toUrlString model.urls.logout) ] [ text "Logout" ]
                 ]

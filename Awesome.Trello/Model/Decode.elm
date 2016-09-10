@@ -14,6 +14,11 @@ id =
     map Id string
 
 
+name : Decoder Name
+name =
+    map Name string
+
+
 board : Decoder Board
 board =
     object2
@@ -27,7 +32,7 @@ card =
     object3
         Card
         ("id" := id)
-        ("name" := string)
+        ("name" := name)
         ("idMembers" := list string)
 
 
@@ -47,5 +52,5 @@ member =
     object3
         Member
         ("id" := id)
-        ("fullName" := string)
+        ("fullName" := name)
         ("boards" := list board |> defaultTo [])
