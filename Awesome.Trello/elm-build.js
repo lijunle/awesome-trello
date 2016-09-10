@@ -1,5 +1,8 @@
 var run = require('../build/run');
 var patch = require('../build/patch');
+var remove = require('../build/remove');
+
+remove(__dirname, './elm-stuff/build-artifacts/0.17.1/lijunle');
 
 run(__dirname, 'elm package install --yes');
 run(__dirname, 'elm make Index.elm --output dist/index.debug.js --warn');
