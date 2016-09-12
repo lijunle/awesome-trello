@@ -12,9 +12,13 @@
   // Configure glob patterns for excluding files and folders.
   "files.exclude": {
     "bin": true,
+    "node_modules": true,
     "obj": true,
+    "**/.DS_Store": true,
     "**/.git": true,
     "**/.svn": true,
-    "**/.DS_Store": true
+    "**/deploy": true,
+    "**/dist": true,
+    "**/elm-stuff": true
   }
 }
