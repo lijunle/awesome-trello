@@ -1,4 +1,5 @@
 var path = require('path');
+var chalk = require('chalk');
 var watch = require('watch');
 var browserSync = require("browser-sync").create();
 var run = require('../build/run');
@@ -28,14 +29,21 @@ function runWatch(file) {
     if (isPackage(file)) {
       run(__dirname, ['elm package install --yes']);
     } else {
-      console.log('Change file ' + file);
+      console.log(
+        chalk.dim('>'),
+        chalk.bold.white('Change file'),
+        chalk.bold.yellow(file)
+      );
+
       run(__dirname, 'elm make --warn Index.elm --output ./dist/index.js');
       patch(__dirname, './dist/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
       patch(__dirname, './dist/index.js', '{TRELLO_APP_NAME}', process.env.TRELLO_APP_NAME);
+
+      console.log(chalk.bold.bgGreen('[[[ Build succeed ]]]'));
     }
   } catch (e) {
     // Skip any error in watch mode.
-    console.log('Error happens.');
+    console.log(chalk.bold.bgRed('!!! Error happens !!!'));
   }
 }
 
@@ -60,9 +68,19 @@ watch.watchTree(
       runWatch('elm-package.json');
       runWatch('Index.elm');
 
-      console.log('Start monitor the directory ' + __dirname);
+      console.log(
+        chalk.dim('>'),
+        chalk.bold.white('Monitor the directory'),
+        chalk.bold.yellow(__dirname)
+      );
+
       Object.keys(file).forEach(function finish(filename) {
-        console.log('- ' + filename);
+        const dirname = path.dirname(filename);
+        const basename = path.basename(filename);
+        console.log(
+          chalk.dim('-'),
+          chalk.white(dirname) + path.sep + chalk.yellow(basename)
+        );
       });
 
       browserSync.init({

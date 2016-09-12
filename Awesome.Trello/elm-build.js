@@ -1,3 +1,4 @@
+var chalk = require('chalk');
 var run = require('../build/run');
 var patch = require('../build/patch');
 var remove = require('../build/remove');
@@ -10,3 +11,5 @@ run(__dirname, 'uglifyjs dist/index.debug.js --compress warnings=false --mangle 
 
 patch(__dirname, './dist/index.js', '{TRELLO_KEY}', process.env.TRELLO_KEY);
 patch(__dirname, './dist/index.js', '{TRELLO_APP_NAME}', process.env.TRELLO_APP_NAME);
+
+console.log(chalk.bold.bgGreen('[[[ Build succeed ]]]'));

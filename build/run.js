@@ -1,4 +1,5 @@
 var path = require('path');
+var chalk = require('chalk');
 var extend = require('object-assign');
 var execSync = require('child_process').execSync;
 
@@ -10,7 +11,10 @@ var env = extend({}, process.env, envBag);
 module.exports = function run(cwd, command, options) {
   options = options || {};
 
-  console.log('> ' + (options.showAs || command));
+  console.log(
+    chalk.dim('>'),
+    chalk.bold.white(options.showAs || command)
+  );
 
   execSync(command, {
     cwd: cwd,

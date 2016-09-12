@@ -1,9 +1,24 @@
 var fs = require('fs');
 var path = require('path');
+var chalk = require('chalk');
 var mkdirp = require('mkdirp');
 
 function copyFile(from, to) {
-  console.log('Copy file ' + from + ' to ' + to);
+  const fromDirName = path.dirname(from);
+  const fromBaseName = path.basename(from);
+
+  console.log(
+    chalk.dim('>'),
+    chalk.bold.white('Copy file'),
+    chalk.yellow(fromDirName + path.sep) + chalk.bold.yellow(fromBaseName)
+  );
+
+  console.log(
+    chalk.dim(' '),
+    chalk.white('to'),
+    chalk.white(to)
+  );
+
   mkdirp.sync(path.dirname(to));
   fs.writeFileSync(to, fs.readFileSync(from));
 }
