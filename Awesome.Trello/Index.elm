@@ -1,14 +1,16 @@
-port module Main exposing (main)
+module Main exposing (main)
 
-import Html.App
+import Navigation
 import Page
+import Router
 
 
 main : Program Never
 main =
-    Html.App.program
+    Navigation.program (Navigation.makeParser Router.parseHash)
         { init = Page.init
         , view = Page.view
         , update = Page.update
+        , urlUpdate = Page.urlUpdate
         , subscriptions = Page.subscriptions
         }
