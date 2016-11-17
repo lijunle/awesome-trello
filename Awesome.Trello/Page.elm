@@ -2,7 +2,6 @@ module Page exposing (Model, Msg, init, update, view, subscriptions)
 
 import Board
 import Html exposing (..)
-import Html.App
 import Http
 import Login
 import Model exposing (..)
@@ -37,7 +36,7 @@ init =
         getTokenCmd =
             WebAPI.Location.location
                 |> Task.map getToken
-                |> Task.perform FetchFail GetToken
+                |> Task.perform GetToken
 
         loginCmd =
             Cmd.map LoginMsg loginMsg
@@ -157,9 +156,9 @@ view model =
 
         _ ->
             div []
-                [ model.login |> Login.view |> Html.App.map LoginMsg
-                , model.boards |>> (Board.view >> Html.App.map BoardMsg) ||> nothing
-                , model.webhooks |>> (Webhook.view >> Html.App.map WebhookMsg) ||> nothing
+                [ model.login |> Login.view |> Html.map LoginMsg
+                , model.boards |>> (Board.view >> Html.map BoardMsg) ||> nothing
+                , model.webhooks |>> (Webhook.view >> Html.map WebhookMsg) ||> nothing
                 ]
 
 
@@ -186,8 +185,15 @@ subscriptions model =
 getMemberMe : Token -> Cmd Msg
 getMemberMe token =
     Request.getMemberMe token
-        |> Task.map (\member -> ( token, member ))
-        |> Task.perform FetchFail FetchSucceed
+        |> Http.send
+            (\result ->
+                case result of
+                    Ok member ->
+                        FetchSucceed ( token, member )
+
+                    Err error ->
+                        FetchFail error
+            )
 
 
 getToken : WebAPI.Location.Location -> Maybe Token

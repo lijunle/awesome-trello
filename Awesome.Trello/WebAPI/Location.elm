@@ -25,7 +25,7 @@ type alias Location =
     , protocol : String
     , host : String
     , hostname : String
-    , port' : String
+    , port_ : String
     , pathname : String
     , search : String
     , hash : String

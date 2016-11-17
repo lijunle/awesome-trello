@@ -2,8 +2,8 @@ module Login exposing (Model, Msg, init, update, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
 import Model exposing (..)
+import Request
 import Task
 import Trello
 import WebAPI.Location
@@ -22,8 +22,7 @@ type alias Model =
 
 
 type Msg
-    = Error String
-    | GetUrls Urls
+    = GetUrls Urls
 
 
 init : Maybe Name -> ( Model, Cmd Msg )
@@ -38,7 +37,7 @@ init maybeName =
         cmd =
             WebAPI.Location.location
                 |> Task.map getUrls
-                |> Task.perform Error GetUrls
+                |> Task.perform GetUrls
     in
         ( model, cmd )
 
@@ -46,9 +45,6 @@ init maybeName =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Error _ ->
-            ( model, Cmd.none )
-
         GetUrls urls ->
             ( { model | urls = urls }, Cmd.none )
 
@@ -85,7 +81,7 @@ getUrls location =
             "https://trello.com/1/authorize"
 
         loginUrl =
-            Http.url authUrl query
+            Request.buildUrl authUrl query
 
         logoutUrl =
             location.origin ++ location.pathname

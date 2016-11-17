@@ -4,7 +4,6 @@ import Html exposing (..)
 import Http
 import Model exposing (..)
 import Request
-import Task
 
 
 type alias Model =
@@ -14,8 +13,7 @@ type alias Model =
 
 
 type Msg
-    = FetchFail Http.Error
-    | FetchSucceed (List Webhook)
+    = FetchWebhooks (Result Http.Error (List Webhook))
 
 
 init : Token -> ( Model, Cmd Msg )
@@ -28,7 +26,7 @@ init token =
 
         cmd =
             Request.getWebhooks token
-                |> Task.perform FetchFail FetchSucceed
+                |> Http.send FetchWebhooks
     in
         ( model, cmd )
 
@@ -36,11 +34,11 @@ init token =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        FetchFail error ->
+        FetchWebhooks (Err error) ->
             {- TODO should do something on error? -}
             ( model, Cmd.none )
 
-        FetchSucceed webhooks ->
+        FetchWebhooks (Ok webhooks) ->
             let
                 newModel =
                     { model | webhooks = webhooks }

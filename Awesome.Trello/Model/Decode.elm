@@ -41,36 +41,36 @@ token =
 
 board : Decoder Board
 board =
-    object2
+    map2
         Board
-        ("id" := boardId)
-        ("name" := name)
+        (field "id" boardId)
+        (field "name" name)
 
 
 card : Decoder Card
 card =
-    object3
+    map3
         Card
-        ("id" := cardId)
-        ("name" := name)
-        ("idMembers" := list memberId)
+        (field "id" cardId)
+        (field "name" name)
+        (field "idMembers" (list memberId))
 
 
 webhook : Decoder Webhook
 webhook =
-    object5
+    map5
         Webhook
-        ("id" := webhookId)
-        ("active" := bool)
-        ("idModel" := boardId)
-        ("description" := string)
-        ("callbackURL" := string)
+        (field "id" webhookId)
+        (field "active" bool)
+        (field "idModel" boardId)
+        (field "description" string)
+        (field "callbackURL" string)
 
 
 member : Decoder Member
 member =
-    object3
+    map3
         Member
-        ("id" := memberId)
-        ("fullName" := name)
-        ("boards" := list board |> defaultTo [])
+        (field "id" memberId)
+        (field "fullName" name)
+        (field "boards" (list board) |> defaultTo [])

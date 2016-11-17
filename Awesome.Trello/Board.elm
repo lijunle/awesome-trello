@@ -200,19 +200,36 @@ toModel token member =
 getCard : Token -> Board -> Cmd Msg
 getCard token board =
     Request.getBoardCards token board
-        |> Task.perform FetchFail FetchCardSucceed
+        |> Http.send
+            (\result ->
+                case result of
+                    Ok board ->
+                        FetchCardSucceed board
+
+                    Err error ->
+                        FetchFail error
+            )
 
 
 getBoardMembers : Token -> Board -> Cmd Msg
 getBoardMembers token board =
     Request.getBoardMembers token board
-        |> Task.perform FetchFail FetchMemberSucceed
+        |> Http.send
+            (\result ->
+                case result of
+                    Ok board ->
+                        FetchMemberSucceed board
+
+                    Err error ->
+                        FetchFail error
+            )
 
 
 setCardsMember : Token -> Member -> List Card -> Cmd Msg
 setCardsMember token member cards =
     {- TODO run tasks simultanously -}
     cards
-        |> List.map (Request.setCardMember token member)
+        |> List.map (Request.setCardMember token member >> Http.toTask)
         |> Task.sequence
-        |> Task.perform FetchFail FetchCardSucceed
+        |> Task.onError (\x -> Task.succeed [])
+        |> Task.perform FetchCardSucceed
