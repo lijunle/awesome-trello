@@ -5,27 +5,37 @@ import Json.Decode
 import Json.Encode
 import Model exposing (..)
 import Model.Decode
-import Task
 import Trello
 
 
-put : String -> Json.Decode.Decoder a -> Json.Encode.Value -> Task.Task Http.Error a
-put url decoder payload =
-    let
-        body =
-            payload
-                |> Json.Encode.encode 0
-                |> Http.string
+buildUrl : String -> List ( String, String ) -> String
+buildUrl baseUrl query =
+    case query of
+        [] ->
+            baseUrl
 
-        request =
-            { verb = "PUT"
-            , headers = [ ( "Content-Type", "application/json" ) ]
-            , url = url
-            , body = body
-            }
-    in
-        Http.send Http.defaultSettings request
-            |> Http.fromJson decoder
+        _ ->
+            let
+                queryPairs =
+                    query |> List.map (\( key, value ) -> Http.encodeUri key ++ "=" ++ Http.encodeUri value)
+
+                queryString =
+                    queryPairs |> String.join "&"
+            in
+                baseUrl ++ "?" ++ queryString
+
+
+put : String -> Http.Body -> Http.Expect a -> Http.Request a
+put url body expect =
+    Http.request
+        { method = "PUT"
+        , headers = []
+        , url = url
+        , body = body
+        , expect = expect
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 patchToken : Token -> List ( String, String ) -> List ( String, String )
@@ -44,7 +54,7 @@ toBaseUrl endPoint =
     "https://api.trello.com/1/" ++ endPoint
 
 
-getMemberMe : Token -> Task.Task Http.Error Member
+getMemberMe : Token -> Http.Request Member
 getMemberMe token =
     let
         baseUrl =
@@ -57,15 +67,15 @@ getMemberMe token =
                 |> patchToken token
 
         url =
-            Http.url baseUrl query
+            buildUrl baseUrl query
 
         member =
             Model.Decode.member
     in
-        Http.get member url
+        Http.get url member
 
 
-getBoardCards : Token -> Board -> Task.Task Http.Error (List Card)
+getBoardCards : Token -> Board -> Http.Request (List Card)
 getBoardCards token board =
     let
         boardId =
@@ -81,15 +91,15 @@ getBoardCards token board =
                 |> patchToken token
 
         url =
-            Http.url baseUrl query
+            buildUrl baseUrl query
 
         cardList =
             Json.Decode.list Model.Decode.card
     in
-        Http.get cardList url
+        Http.get url cardList
 
 
-getBoardMembers : Token -> Board -> Task.Task Http.Error (List Member)
+getBoardMembers : Token -> Board -> Http.Request (List Member)
 getBoardMembers token board =
     let
         boardId =
@@ -105,15 +115,15 @@ getBoardMembers token board =
                 |> patchToken token
 
         url =
-            Http.url baseUrl query
+            buildUrl baseUrl query
 
         memberList =
             Json.Decode.list Model.Decode.member
     in
-        Http.get memberList url
+        Http.get url memberList
 
 
-setCardMember : Token -> Member -> Card -> Task.Task Http.Error Card
+setCardMember : Token -> Member -> Card -> Http.Request Card
 setCardMember token member card =
     let
         cardId =
@@ -126,19 +136,20 @@ setCardMember token member card =
             [] |> patchToken token
 
         url =
-            Http.url baseUrl query
+            buildUrl baseUrl query
 
-        cardDecoder =
-            Model.Decode.card
+        expectCard =
+            Http.expectJson Model.Decode.card
 
         body =
             [ ( "value", member.id |> toMemberIdString |> Json.Encode.string ) ]
                 |> Json.Encode.object
+                |> Http.jsonBody
     in
-        put url cardDecoder body
+        put url body expectCard
 
 
-getWebhooks : Token -> Task.Task Http.Error (List Webhook)
+getWebhooks : Token -> Http.Request (List Webhook)
 getWebhooks token =
     let
         tokenString =
@@ -151,9 +162,9 @@ getWebhooks token =
             [] |> patchToken token
 
         url =
-            Http.url baseUrl query
+            buildUrl baseUrl query
 
         webhooksDecoder =
             Model.Decode.webhook |> Json.Decode.list
     in
-        Http.get webhooksDecoder url
+        Http.get url webhooksDecoder

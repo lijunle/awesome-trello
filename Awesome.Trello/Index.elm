@@ -1,12 +1,12 @@
 port module Main exposing (main)
 
-import Html.App
+import Html
 import Page
 
 
-main : Program Never
+main : Program Never Page.Model Page.Msg
 main =
-    Html.App.program
+    Html.program
         { init = Page.init
         , view = Page.view
         , update = Page.update
